@@ -1,34 +1,70 @@
-# importing whole module
+import tkinter as tk
 from tkinter import *
-from tkinter.ttk import *
 
-# importing strftime function to
-# retrieve system's time
-from time import strftime
-
-# creating tkinter window
-root = Tk()
-root.title('Clock')
-root.attributes('-fullscreen', True)
+LARGE_FONT = ("Verdana", 12)
 
 
-# This function is used to
-# display time on the label
-def time():
-    string = strftime('%H:%M:%S %p')
-    lbl.config(text=string)
-    lbl.after(1000, time)
+class TORiClass(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        for F in (MainView, Clock, Test):
+            frame = F(container, self)  # F(parent=container, controller=self)
+            self.frames[F] = frame
+            frame.grid(row=1, column=0, sticky="nsew")
+
+        self.show_frame(MainView)
+
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
 
 
-# Styling the label widget so that clock
-# will look more attractive
-lbl = Label(root, font=('calibri', 40, 'bold'),
-            background='blue',
-            foreground='purple')
+class MainView(tk.Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Main View", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
 
-# Placing clock at the centre
-# of the tkinter window
-lbl.pack(anchor='center')
-time()
+        button1 = Button(self, text="Clock", command=lambda: controller.show_frame(Clock))
+        button1.pack()
 
-mainloop()
+        button2 = Button(self, text="Test", command=lambda: controller.show_frame(Test))
+        button2.pack()
+
+
+class Clock(tk.Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Clock View", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        button1 = Button(self, text="Main", command=lambda: controller.show_frame(MainView))
+        button1.pack()
+
+        button2 = Button(self, text="Test", command=lambda: controller.show_frame(Test))
+        button2.pack()
+
+
+class Test(tk.Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Test View", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        button1 = Button(self, text="Main", command=lambda: controller.show_frame(MainView))
+        button1.pack()
+
+        button2 = Button(self, text="Clock", command=lambda: controller.show_frame(Clock))
+        button2.pack()
+
+
+app = TORiClass()
+app.mainloop()

@@ -1,23 +1,24 @@
+import imaplib  # for determining num of unread emails?
+import os
+import pickle
+import subprocess
+
+import cv2  # for facial recognition and possibly autonomous actions
+import numpy as np
+import requests  # for weather API
 import speech_recognition as sr  # records audio and turns it into text
+# from PIL import Image
 # requires internet
 from gtts import gTTS  # converts text to speech - allows program to respond
-import os
-import subprocess
-import cv2  # for facial recognition and possibly autonomous actions
-import pickle
-import numpy as np
-from PIL import Image
-import requests, json  # for weather API
-import imaplib, re  # for determining num of unread emails?
 # libraries for Google searches
 # for searches
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 # for gmail login
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 def greeting():  # initial process of user authentication on start up
