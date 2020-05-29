@@ -1,8 +1,5 @@
 from tkinter import *
-from time import gmtime, strftime
-from datetime import datetime
 import time
-import sys
 
 
 def tick():
@@ -24,6 +21,7 @@ clock = Label(root,
               foreground="lightblue",
               background="black")
 clock.grid(column=0, row=0)
+
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 root.bind("<Button-1>", close)
