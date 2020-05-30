@@ -1,5 +1,6 @@
 import tkinter as tk
 import time
+from datetime import date
 
 # References:
 # 1. multiple frames
@@ -13,6 +14,12 @@ import time
 
 
 LARGE_FONT = ("Verdana", 12)
+months = {1: "January", 2: "February",
+          3: "March", 4: "April",
+          5: "May", 6: "June",
+          7: "July", 8: "August",
+          9: "September", 10: "October",
+          11: "November", 12: "December"}
 
 
 def close():
@@ -33,7 +40,11 @@ class Page(tk.Frame):
 class CentralView(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        label = tk.Label(self, text="Main View", font=LARGE_FONT)
+        label = tk.Label(
+            self,
+            text="Main View",
+            font=LARGE_FONT
+        )
         label.pack(side="top", fill="both", expand=True)
 
 
@@ -41,37 +52,133 @@ class ClockView(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
         self.time_str = "00:00:00"  # from reference 3.a
-        self.time_label = tk.Label(self, text=self.time_str, fg="lightblue", bg="black", font=("times", 200, "bold"))
+        self.date_str = "January 1, 2000"  # default date
+        self.time_label = tk.Label(
+            self,
+            text=self.time_str,
+            fg="lightblue",
+            bg="black",
+            font=("times", 200, "bold")
+        )
         self.time_label.pack(side="top", fill="both", expand=True)
+        self.date_label = tk.Label(
+            self,
+            text=self.date_str,
+            fg="white",
+            bg="black",
+            font=("times", 75, "bold")
+        )
+        self.date_label.pack(side="top", fill="both", expand=True)
         self.time_label.after(1000, self.timeTick)
 
     # from reference 3.a
     def timeTick(self):
+        # get updated time
         self.time_str = time.strftime("%H:%M:%S")
+        # get updated date
+        date_today = date.today()
+        self.date_str = months[date_today.month] + " " + str(date_today.day) + ", " + str(date_today.year)
+        # update the labels
         self.time_label.config(text=self.time_str)
+        self.date_label.config(text=self.date_str)
+        # wait a second to update the date/time again
         self.time_label.after(1000, self.timeTick)
 
 
-class TestView(Page):
+class PomodoroTimerView(Page):
+    minutes = 25
+    seconds = 0
+    interval = 0  # 0 = study time (25 minutes), 1 = break time (5 minutes)
+    num_study_passed = 0  # stores the number of study periods that have passed
+    num_break_passed = 0
+
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        label = tk.Label(self, text="Test View", font=LARGE_FONT)
-        label.pack(side="top", fill="both", expand=True)
+        # timer attributes -----------------------------------------------
+        self.timer_str = '{:02d}:{:02d}'.format(self.minutes, self.seconds)
+        self.time_label = tk.Label(
+            self,
+            text=self.timer_str,
+            font=("times", 175, "bold"),
+        )
+        self.time_label.pack(side="top", fill="both", expand=True)
+
+        # buttons (start, pause, reset) ----------------------------------
+        button_frame = tk.Frame(self, bg="black")
+        button_frame.pack(side="top", fill="x", expand=False)
+        self.start_button = tk.Button(
+            button_frame,
+            text="Start",
+            fg="black",
+            bg="lightgreen",
+            command=self.startTimer
+        )
+        self.start_button.pack(side="top", fill="both", expand=True)
+
+        self.paused = False
+        self.pause_button = tk.Button(
+            button_frame,
+            text="Pause",
+            fg="black",
+            bg="red",
+            command=self.pauseTimer
+        )
+        self.pause_button.pack(side="top", fill="both", expand=True)
+
+    def startTimer(self):
+        self.start_button.grid_forget()
+        # minutes = 25
+        # seconds = 0
+
+        # XX:00
+        if self.seconds == 0:
+            # 00:00
+            if self.minutes == 0:
+                # study time is over
+                if self.interval == 0:
+                    # BEEP (of some notification) - TODO
+                    # 5 minutes of break time have begun
+                    self.minutes = 4
+                    self.seconds = 59
+                    self.interval = 1
+                # break time is over
+                else:
+                    # BEEP (of some notification) - TODO
+                    # 25 minutes of study time have begun
+                    self.minutes = 24
+                    self.seconds = 59
+                    self.interval = 0
+            # a minute has passed and time still remains
+            else:
+                self.minutes -= 1
+                self.seconds = 59
+        # seconds > 0
+        else:
+            self.seconds -= 1
+        self.timer_str = '{:02d}:{:02d}'.format(self.minutes, self.seconds)
+        self.time_label.config(text=self.timer_str)
+        self.time_label.after(1000, self.startTimer)
+        # self.start_button.grid()
+
+    def pauseTimer(self):
+        if self.paused:
+            self.paused = False
+        else:
+            self.paused = True
 
 
 class MainView(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-        self.v2 = ClockView
         v1 = CentralView(self)
         v1["bg"] = "black"
         v2 = ClockView(self)
         v2["bg"] = "black"
-        v3 = TestView(self)
+        v3 = PomodoroTimerView(self)
         v3["bg"] = "black"
 
-        button_frame = tk.Frame(self)
-        container = tk.Frame(self)
+        button_frame = tk.Frame(self, bg="black")
+        container = tk.Frame(self, bg="black")
         button_frame.pack(side="right", fill="x", expand=False)
         container.pack(side="left", fill="both", expand=True)
 
@@ -79,30 +186,33 @@ class MainView(tk.Frame):
         v2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         v3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
+        # button for main screen
         b1 = tk.Button(
             button_frame,
             text="Main View",
             fg="white",
-            bg="black",
-            width=10,
+            bg="gray",
+            width=15,
             height=10,
             command=v1.lift
         )
+        # button for Clock screen (TEMPORARY)
         b2 = tk.Button(
             button_frame,
             text="Clock",
             fg="white",
-            bg="black",
-            width=10,
+            bg="gray",
+            width=15,
             height=10,
             command=v2.lift
         )
+        # button for Pomodoro Timer screen
         b3 = tk.Button(
             button_frame,
-            text="Test",
+            text="Pomodoro \nTimer",
             fg="white",
-            bg="black",
-            width=10,
+            bg="gray",
+            width=15,
             height=10,
             command=v3.lift
         )
@@ -110,8 +220,8 @@ class MainView(tk.Frame):
             button_frame,
             text="Exit",
             bg="red",
-            width=10,
-            height=10,
+            width=15,
+            height=5,
             command=close
         )
 
@@ -126,6 +236,7 @@ class MainView(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     main = MainView(root)
+    main["background"] = "black"
     main.pack(side="top", fill="both", expand=True)
     # root.wm_geometry("400x400")
     root.attributes("-fullscreen", True)
