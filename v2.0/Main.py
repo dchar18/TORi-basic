@@ -127,8 +127,6 @@ class PomodoroTimerView(Page):
 
     def startTimer(self):
         self.start_button.grid_forget()
-        # minutes = 25
-        # seconds = 0
 
         # XX:00
         if self.seconds == 0:
