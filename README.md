@@ -14,3 +14,11 @@ Dependencies:
   - tkinter (which comes with python)
   - time (which is also comes with python)
   - spotipy
+
+v2.0 Functions:
+- Running clock
+- Pomodoro timer
+  - with pause/play functionality
+  - reset
+- LED control
+  - contains 5 buttons that control the states of connected LEDs
