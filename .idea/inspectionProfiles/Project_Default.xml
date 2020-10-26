@@ -17,6 +17,9 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="tkinter.Frame.__setitem__" />
+          <option value="v2.Main.Clock" />
+          <option value="v2.Main.Pomodoro" />
+          <option value="v2.Main.Spotify" />
         </list>
       </option>
     </inspection_tool>
