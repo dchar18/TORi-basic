@@ -50,10 +50,10 @@ def resetInteractionTimer():
 
 def checkInteraction():
     if counter == 10:
-        changeFrame(Views.frames[0])
+        changeFrame(Views.frames[1])
         timer.start()
-    else:
-        timer.start()
+    # else:
+    #     timer.start()
 
 
 # taken from Reference 1.a
