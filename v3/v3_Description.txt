@@ -1,0 +1,23 @@
+TORi version 3
+Author: Damian Charczuk
+
+Description:
+
+Version 3 of TORi incorporates both the desktop (v1) and Raspberry Pi (v2) versions into
+one running program. The struture is as follows:
+
+- UI -
+The UI of the TORi v3 will be based around the UI of v2 with additional views and buttons
+One such view will have shortcuts to the various functions that will be added in v3 such as:
+    - LED control : control addressable LEDs over WiFi
+    - Music control : use the Spotify API to manage music playback
+    - Timer functions : set a timer, stopwatch, Pomodoro timer
+
+- Backend / UX -
+Drawing some inspiration from v1, the backend will be the core of the software
+The following technologies/techniques will be applied:
+    - NLP : speech recognition, trigger/wake word detection, command parsing, natural responses
+    - Database : store command history, search history
+    - Scheduled events : set reminders, notifications, automated tasks
+
+    
