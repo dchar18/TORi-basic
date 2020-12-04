@@ -1,16 +1,21 @@
 {"intents" : 
     [
         {
-            "tag": "greeting",
+            "tag": "wake",
             "patterns": [
                 "hey tori", 
                 "rise and shine", 
                 "good evening", 
-                "wake up"
+                "wake up",
+                "it's time to work",
+                "good morning, tori",
+                "good evening, tori",
+                "wake up tori"
             ],
             "responses": [
                 "Hello", 
-                "At your service"
+                "At your service",
+                "Whwat can I do for you?"
             ]
         },
         {
@@ -18,10 +23,12 @@
             "patterns": [
                 "Tell me about yourself", 
                 "who are you?", 
-                "state your identity"
+                "state your identity",
+                "what can you do?"
             ],
             "responses": [
-                "I am TORi, Transoperational Robotic Intelligence. I am your virtual assistant"
+                "I am TORi. My name stands for Transoperational Robotic Intelligence. I am your virtual assistant",
+                "I can automate tasks, look up search queries, and control IoT devices. Soon, I'll be able to do much more"
             ]
         },
         {
@@ -52,7 +59,12 @@
             "patterns": [
                 "convert 12 centimeters to inches",
                 "multiply 12 by 5",
-                "calculate the natural log of 4"
+                "calculate the natural log of 4",
+                "how many inches are in a mile",
+                "square the difference of 5 and 2",
+                "find the derivative of sine",
+                "convert 72 degrees fahrenheit to celcius",
+                "how many minutes in 4 years"
             ],
             "responses": [
                 "As you wish"
@@ -64,7 +76,8 @@
                 "start a new file called ideas.txt",
                 "create a new text file",
                 "start a new python script",
-                "open the version 3 description text file"
+                "open the version 3 description text file",
+                "open your source code"
             ],
             "responses": [
                 "Creating file now",
@@ -98,8 +111,25 @@
         },
         {
             "tag": "wifi",
-            "patterns": [],
-            "responses": []
+            "patterns": [
+                "Start the wifi network",
+                "disconnect all the peripherals",
+                "how many devices are connected?",
+                "what devices are connected?",
+                "is your network open?",
+                "what is the name of your wifi network",
+                "what's the password to your network?"
+            ],
+            "responses": [
+                "Starting network now",
+                "Okay, disconnecting",
+                "I have <number> devices connected",
+                "Connected devices: <device list>",
+                "Yes, it open",
+                "No, it closed",
+                "My network is called <name>",
+                "I cannot reveal the password to my network. However the hint is: <hint>"
+            ]
         },
         {
             "tag": "modes",
@@ -108,6 +138,17 @@
                 "it's study time", 
                 "activate study mode", 
                 "it's christmas"
+            ],
+            "responses": []
+        },
+        {
+            "tag": "update",
+            "patterns": [
+                "Retrain the nlp model", 
+                "retrain the model", 
+                "update the input model", 
+                "upload the history",
+                "upload the history and update the model"
             ],
             "responses": []
         }
