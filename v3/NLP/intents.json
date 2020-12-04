@@ -79,14 +79,21 @@
                 "check my personal email",
                 "check my professional email",
                 "how many unread emails do I have?",
-                "how many unread messages do I have?",
-                ""
+                "how many unread messages do I have?"
             ],
-            "responses": []
+            "responses": ["Checking email now"]
         },
         {
             "tag": "leds",
-            "patterns": [],
+            "patterns": [
+                "turn on the leds",
+                "turn off the leds",
+                "change the leds to blue",
+                "change the leds to red",
+                "change the leds to blue",
+                "shuffle the led effect",
+                "change the leds to cloud mode"
+            ],
             "responses": []
         },
         {
