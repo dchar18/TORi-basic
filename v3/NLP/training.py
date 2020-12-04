@@ -94,3 +94,4 @@ def train_nlp_model():
 
     hist = model.fit(np.array(X_train), np.array(y_train), epochs=200, batch_size=5, verbose=1)
     model.save('nlp_model.h5', hist)
+    print("Done training")

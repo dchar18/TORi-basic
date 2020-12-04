@@ -22,8 +22,8 @@ class NLP():
     def __init__(self) -> None:
         self.lemmatizer = WordNetLemmatizer()
         self.intents = json.loads(open('intents.json').read())
-        self.words = pickle.load('words.pkl', 'rb')
-        self.classes = pickle.load('classes.pkl', 'rb')
+        self.words = pickle.load(open('words.pkl', 'rb'))
+        self.classes = pickle.load(open('classes.pkl', 'rb'))
 
         # check if a model was already trained
         if path.exists('nlp_model.h5'):
@@ -34,6 +34,10 @@ class NLP():
             train_nlp_model()
             # store the model
             self.model = load_model('nlp_model.h5')
+
+    def retrain_model(self):
+        train_nlp_model()
+        self.model = load_model('nlp_model.h5')
 
     # tokenize and lemmatize the input sentence
     def clean_sentence(self, sentence):
