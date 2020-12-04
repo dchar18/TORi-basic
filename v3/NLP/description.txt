@@ -1,0 +1,9 @@
+Function: NLP model
+References: 
+    1. https://www.youtube.com/watch?v=1lwddP0KUEg
+        - used to create training.py and some functions in nlp.py
+
+This section of TORi deals with taking in user input and identifying the intent. This is done by first taking in sample data with labeled intents and sample responses. Then, the data is tokenized, lemmatized, and converted into a bag of words. Tokenization breaks up the sentence into words (or tokens). Then, the lemmatizer breaks each word down into its stem word (the lemma). Finally, the lemmatized words for each sample is converted into a vector 
+of 1's and 0's, where each word that is present in the vocabulary is represented by a 1 and a 0 otherwise. These vectors are used as the features (X_train). The intents that each sample belong to are the labels (y_train).
+
+Then, the model is build and trained on the training data generated in the previous paragraph. This model is stored as "nlp_model.h5", which is then accessed whenever new input is received

@@ -1,0 +1,108 @@
+{"intents" : 
+    [
+        {
+            "tag": "greeting",
+            "patterns": [
+                "hey tori", 
+                "rise and shine", 
+                "good evening", 
+                "wake up"
+            ],
+            "responses": [
+                "Hello", 
+                "At your service"
+            ]
+        },
+        {
+            "tag": "about",
+            "patterns": [
+                "Tell me about yourself", 
+                "who are you?", 
+                "state your identity"
+            ],
+            "responses": [
+                "I am TORi, Transoperational Robotic Intelligence. I am your virtual assistant"
+            ]
+        },
+        {
+            "tag": "weather",
+            "patterns": [
+                "What is the weather in Arlington Heights", 
+                "can you give me forecast for the next 5 days?", 
+                "what's the weather for today?"
+            ],
+            "responses": [
+                "Pulling weather data now"
+            ]
+        },
+        {
+            "tag": "google",
+            "patterns": [
+                "Look up pictures of cars", 
+                "show me images of Ryan Renolds", 
+                "look up how to tie a tie",
+                "show me how to restart my computer"
+            ],
+            "responses": [
+                "Right away, sir"
+            ]
+        },
+        {
+            "tag": "math",
+            "patterns": [
+                "convert 12 centimeters to inches",
+                "multiply 12 by 5",
+                "calculate the natural log of 4"
+            ],
+            "responses": [
+                "As you wish"
+            ]
+        },
+        {
+            "tag": "file",
+            "patterns": [
+                "start a new file called ideas.txt",
+                "create a new text file",
+                "start a new python script",
+                "open the version 3 description text file"
+            ],
+            "responses": [
+                "Creating file now",
+                "Opening the file"
+            ]
+        },
+        {
+            "tag": "email",
+            "patterns": [
+                "check my email", 
+                "check my school email",
+                "check my personal email",
+                "check my professional email",
+                "how many unread emails do I have?",
+                "how many unread messages do I have?",
+                ""
+            ],
+            "responses": []
+        },
+        {
+            "tag": "leds",
+            "patterns": [],
+            "responses": []
+        },
+        {
+            "tag": "wifi",
+            "patterns": [],
+            "responses": []
+        },
+        {
+            "tag": "modes",
+            "patterns": [
+                "Turn on study mode", 
+                "it's study time", 
+                "activate study mode", 
+                "it's christmas"
+            ],
+            "responses": []
+        }
+    ]
+}
