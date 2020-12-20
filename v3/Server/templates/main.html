@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<head>
+   <title>TORi Server</title>
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+      integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+   <!-- Optional theme -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+      integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+   <!-- Latest compiled and minified JavaScript -->
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+      integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+      crossorigin="anonymous"></script>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+   <h1>TORi Server</h1>
+   {% for b in boards %}
+   <h2>{{boards[b].name}}</h2>
+   <h4>Mode: {{boards[b].mode}}</h4>
+   <div class="row">
+      <div class="col-md-2">
+         <a href="/{{boards[b].name}}/off" class="btn btn-block btn-lg btn-default" role="button">Off</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/{{boards[b].name}}/random" class="btn btn-block btn-lg btn-default" role="button">Random</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/{{boards[b].name}}/christmas" class="btn btn-block btn-lg btn-default" role="button">Christmas</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/{{boards[b].name}}/study" class="btn btn-block btn-lg btn-default" role="button">Study</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/{{boards[b].name}}/party" class="btn btn-block btn-lg btn-default" role="button">Party</a>
+      </div>
+   </div>
+   {% endfor %}
+   <div class="row">
+      <div class="col-md-2">
+         <a href="/off/sync" class="btn btn-block btn-lg btn-default" role="button">All Off</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/random/sync" class="btn btn-block btn-lg btn-default" role="button">All Random</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/christmas/sync" class="btn btn-block btn-lg btn-default" role="button">All Christmas</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/study/sync" class="btn btn-block btn-lg btn-default" role="button">All Study</a>
+      </div>
+      <div class="col-md-2">
+         <a href="/party/sync" class="btn btn-block btn-lg btn-default" role="button">All Party</a>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-2">
+         <a href="/shutdown" class="btn btn-block btn-lg btn-default" role="button">Shut down server</a>
+      </div>
+   </div>
+</body>
+
+</html>
