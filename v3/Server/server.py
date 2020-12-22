@@ -41,7 +41,7 @@ def main():
 # The function below is executed when someone requests a URL with the pin number and action in it:
 @app.route("/<board>/<mode>")
 def action(board, mode):
-    print('TORi/v3/Server/server: entering action(' , board, ', ', mode, ')')
+    print('Entering action(' , board, ', ', mode, ')')
     # get the board from the URL
     target_board = str(board)
     # update the board's mode
@@ -61,6 +61,7 @@ def action(board, mode):
 # The function below is executed when user requests all devices to update
 @app.route("/<mode>/sync")
 def sync(mode):
+    print('Entering sync(',mode,')')
     for b in boards:
         # update the board's mode
         boards[b]['mode'] = mode

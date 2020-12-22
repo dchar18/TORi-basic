@@ -59,19 +59,19 @@ app = server_start()
 # changeMode('esp8266_desk', 'study')
 
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from time import sleep
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+# from time import sleep
 
-opt = Options()
-opt.add_argument("--headless") 
+# opt = Options()
+# opt.add_argument("--headless") 
 
-driver = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=opt)
-driver.get('http://192.168.50.114:8181/')
+# driver = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=opt)
+# driver.get('http://192.168.50.114:8181/')
 
-for i in range(5):
-    print(i)
-    driver.find_element_by_xpath('/html/body/div[1]/div/a').click()
-    sleep(2)
+# for i in range(5):
+#     print(i)
+#     driver.find_element_by_xpath('/html/body/div[1]/div/a').click()
+#     sleep(2)
 
-driver.close()
+# driver.close()
