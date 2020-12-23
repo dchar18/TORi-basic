@@ -20,4 +20,18 @@ The following technologies/techniques will be applied:
     - Database : store command history, search history
     - Scheduled events : set reminders, notifications, automated tasks
 
+- Skills used/learned -
+- creating nlp models for identifying the intent of a command
+- working with servers
+    - setting up a server using a local static IP address and Flask
+    - using MQTT to interface with IoT devices (i.e. esp8266)
+    - communicate between server and client (IoT devices)
+    - utilizing HTTP requests for fast interaction with web server
+    - sending HTTP requests from various platforms
+        - Python (core project)
+        - web browser
+        - Flutter application
+- connecting independently created classes
+- connecting hardware with software 
+
     
