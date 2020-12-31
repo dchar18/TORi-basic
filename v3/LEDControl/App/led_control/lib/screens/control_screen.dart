@@ -4,11 +4,16 @@ import 'package:http/http.dart';
 
 class ControlScreen extends StatefulWidget {
   final String device;
+  static String mode = "";
 
   ControlScreen({this.device});
 
   @override
   _ControlScreenState createState() => _ControlScreenState();
+
+  static void setMode(String newMode) {
+    mode = newMode;
+  }
 }
 
 class _ControlScreenState extends State<ControlScreen> {
@@ -18,7 +23,40 @@ class _ControlScreenState extends State<ControlScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: myAppBar(context, widget.device),
       body: Container(
-        child: modeList(widget.device),
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(top: 10, bottom: 5, right: 15, left: 20),
+              child: Row(
+                children: [
+                  Text(
+                    "Current mode: ",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    ControlScreen.mode,
+                    style: TextStyle(
+                      color: Theme.of(context).accentColor,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: modeList(widget.device),
+            ),
+          ],
+        ),
       ),
     );
   }

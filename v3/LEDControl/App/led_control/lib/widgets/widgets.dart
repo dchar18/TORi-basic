@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:led_control/screens/add_device_screen.dart';
 import 'package:led_control/screens/control_screen.dart';
+import 'package:led_control/screens/rc_control_screen.dart';
 
-List<String> devices = ["All", "Bed", "Desk"];
+List<String> devices = ["All", "Bed", "Desk", "RC Lambo"];
 
 Widget deviceList() {
   return ListView.builder(
@@ -29,7 +30,9 @@ class DeviceTile extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ControlScreen(device: deviceName),
+          builder: (_) => deviceName == "RC Lambo"
+              ? RCControlScreen()
+              : ControlScreen(device: deviceName),
         ),
       ),
       child: Container(
@@ -98,6 +101,7 @@ List<String> modes = [
 
 Widget modeList(String device) {
   return ListView.builder(
+    shrinkWrap: true,
     padding: EdgeInsets.only(top: 15.0),
     itemCount: modes.length,
     itemBuilder: (BuildContext context, int index) {
@@ -122,6 +126,7 @@ class ModeTile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         sendRequest(device, modeName);
+        ControlScreen.setMode(modeName);
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 10),
