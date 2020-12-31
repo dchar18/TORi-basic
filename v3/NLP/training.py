@@ -1,6 +1,6 @@
 import random
 from typing import Sequence
-from nltk.tag.brill import Word
+# from nltk.tag.brill import Word
 import numpy as np
 import pickle
 import json

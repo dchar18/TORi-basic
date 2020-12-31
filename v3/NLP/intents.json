@@ -10,21 +10,26 @@
                 "it's time to work",
                 "good morning, tori",
                 "good evening, tori",
-                "wake up tori"
+                "wake up tori",
+                "okay tori",
+                "let's get to work"
             ],
             "responses": [
                 "Hello", 
                 "At your service",
-                "Whwat can I do for you?"
+                "What can I do for you?"
             ]
         },
         {
             "tag": "about",
             "patterns": [
-                "Tell me about yourself", 
+                "tell me about yourself", 
                 "who are you?", 
                 "state your identity",
-                "what can you do?"
+                "what can you do?",
+                "state your objective",
+                "list your functions",
+                "what are you?"
             ],
             "responses": [
                 "I am TORi. My name stands for Transoperational Robotic Intelligence. I am your virtual assistant",
@@ -36,7 +41,13 @@
             "patterns": [
                 "What is the weather in Arlington Heights", 
                 "can you give me forecast for the next 5 days?", 
-                "what's the weather for today?"
+                "what's the weather for today?",
+                "show me the local weather",
+                "what is the weather for the next three days?",
+                "show me the forecast for Chicago",
+                "what will be the weather on the 29th?",
+                "what was the weather yesterday?",
+                "show me the hourly temperature"
             ],
             "responses": [
                 "Pulling weather data now"
@@ -48,7 +59,13 @@
                 "Look up pictures of cars", 
                 "show me images of Ryan Renolds", 
                 "look up how to tie a tie",
-                "show me how to restart my computer"
+                "show me how to restart my computer",
+                "can you show me images of the ipad pro?",
+                "show me images of the lexus gs f",
+                "look up how to pay taxes",
+                "what is the circumference of the earth?",
+                "how much does the playstation 5 cost?",
+                "open a new google chrome window"
             ],
             "responses": [
                 "Right away, sir"
@@ -64,7 +81,10 @@
                 "square the difference of 5 and 2",
                 "find the derivative of sine",
                 "convert 72 degrees fahrenheit to celcius",
-                "how many minutes in 4 years"
+                "how many minutes in 4 years",
+                "how do you calculate the gradient?",
+                "what is 15 percent of 35?",
+                "what is 70 percent off of 20 dollars?"
             ],
             "responses": [
                 "As you wish"
@@ -77,7 +97,10 @@
                 "create a new text file",
                 "start a new python script",
                 "open the version 3 description text file",
-                "open your source code"
+                "open your source code",
+                "write this down",
+                "make a note",
+                "open gsf.csv"
             ],
             "responses": [
                 "Creating file now",
@@ -92,44 +115,29 @@
                 "check my personal email",
                 "check my professional email",
                 "how many unread emails do I have?",
-                "how many unread messages do I have?"
+                "how many unread messages do I have?",
+                "start a new email to Teja",
+                "open the email from Indeed from Decemeber 13th?",
+                "what is my unread count?"
             ],
             "responses": ["Checking email now"]
         },
         {
             "tag": "leds",
             "patterns": [
-                "turn on the leds",
-                "turn off the leds",
                 "change the leds to blue",
                 "change the leds to red",
                 "change the leds to blue",
                 "shuffle the led effect",
-                "change the leds to cloud mode"
+                "change the leds to cloud mode",
+                "set the bed to blue",
+                "set all leds to purple",
+                "set the desk to christmas mode and the bed to party mode",
+                "set all boards to study mode",
+                "set leds to twinkle",
+                "turn off all the leds"
             ],
             "responses": []
-        },
-        {
-            "tag": "wifi",
-            "patterns": [
-                "Start the wifi network",
-                "disconnect all the peripherals",
-                "how many devices are connected?",
-                "what devices are connected?",
-                "is your network open?",
-                "what is the name of your wifi network",
-                "what's the password to your network?"
-            ],
-            "responses": [
-                "Starting network now",
-                "Okay, disconnecting",
-                "I have <number> devices connected",
-                "Connected devices: <device list>",
-                "Yes, it open",
-                "No, it closed",
-                "My network is called <name>",
-                "I cannot reveal the password to my network. However the hint is: <hint>"
-            ]
         },
         {
             "tag": "modes",
@@ -137,7 +145,10 @@
                 "Turn on study mode", 
                 "it's study time", 
                 "activate study mode", 
-                "it's christmas"
+                "it's christmas",
+                "turn on party mode",
+                "switch over to relaxation mode",
+                "switch to quiet mode"
             ],
             "responses": []
         },
@@ -148,7 +159,27 @@
                 "retrain the model", 
                 "update the input model", 
                 "upload the history",
-                "upload the history and update the model"
+                "upload the history and update the model",
+                "can you retrain the input model",
+                "retrain the prediction model",
+                "update the nlp model"
+            ],
+            "responses": []
+        },
+        {
+            "tag": "application",
+            "patterns": [
+                "open spotify",
+                "launch google chrome",
+                "open arduino",
+                "launch xcode",
+                "open xcode",
+                "launch spotify",
+                "open the app store",
+                "open a terminal window",
+                "quit microsoft word",
+                "open sublime text",
+                "quit xcode"
             ],
             "responses": []
         }
