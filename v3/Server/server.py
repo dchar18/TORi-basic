@@ -16,14 +16,37 @@ mqttc.loop_start()
 # dictionary of client devices
 # 'mode' corresponds to the mode each board is running
 # 'status' indicates whether or not the board is connected to the server
-modes = ['off', 'random', 'christmas', 'study', 'party']
 
 boards = {
-    'esp8266_desk' : {'name' : 'esp8266_desk', 'mode' : modes[0], 'status' : False},
-    'esp8266_bed' : {'name' : 'esp8266_bed', 'mode' : modes[0], 'status' : False}
+    'esp8266_desk' : {
+        'name' : 'esp8266_desk', 
+        'mode' : 'off', 
+        'rgb' : {
+            'red' : 0, 
+            'green' : 0, 
+            'blue' : 0
+        }
+    },
+    'esp8266_bed' : {
+        'name' : 'esp8266_bed', 
+        'mode' : 'off', 
+        'rgb' : {
+            'red' : 0, 
+            'green' : 0, 
+            'blue' : 0
+        }
+    },
+    'esp8266_rclambo' : {
+        'name' : 'esp8266_rclambo', 
+        'mode' : 'off', 
+        'rgb' : {
+            'red' : 0, 
+            'green' : 0, 
+            'blue' : 0
+        }
+    }
 }
 serverData = {
-    'modes' : modes,
     'boards' : boards
 }
 
@@ -50,12 +73,11 @@ def action(board, mode):
         print(i,': ',boards[i])
 
     serverData = {
-        'modes' : modes,
         'boards' : boards
     }
 
     topic = target_board + '/' + mode
-    mqttc.publish(topic, target_board)
+    mqttc.publish(topic, target_board) # publish() takes topic and message as parameters
     return render_template('main.html', **serverData)
 
 # The function below is executed when user requests all devices to update
@@ -70,12 +92,31 @@ def sync(mode):
         print(i,': ',boards[i])
 
     serverData = {
-        'modes' : modes,
         'boards' : boards
     }
 
     mqttc.publish(mode, "all")
     return render_template('main.html', **serverData)
+
+# this funciton is executed when the RGB sliders are used in the Flutter application
+@app.route("/<board>/<mode>/<red>/<green>/<blue>")
+def rgb(board, mode, red, green, blue):
+     print('Entering rgb(',red,',',green,',',blue,')')
+     target_board = str(board)
+     boards[target_board]['mode'] = mode
+     boards[target_board]['rgb']['red'] = int(red)
+     boards[target_board]['rgb']['green'] = int(green)
+     boards[target_board]['rgb']['blue'] = int(blue)
+
+     serverData = {
+        'boards' : boards
+    }
+     
+     topic = str(board) + '/rgb'
+     message = red + '/' + green + '/' + blue
+     mqttc.publish(topic, message)
+     return render_template('main.html', **serverData)
+
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
