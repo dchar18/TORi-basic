@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:led_control/data/device_modes.dart';
 import 'package:led_control/screens/add_device_screen.dart';
 import 'package:led_control/screens/control_screen.dart';
 import 'package:led_control/screens/rc_control_screen.dart';
@@ -31,8 +32,8 @@ class DeviceTile extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (_) => deviceName == "RC Lambo"
-              ? RCControlScreen()
-              : ControlScreen(device: deviceName),
+              ? RCControlScreen(dc: new DeviceControl(this.deviceName))
+              : ControlScreen(dc: new DeviceControl(this.deviceName)),
         ),
       ),
       child: Container(
@@ -126,7 +127,7 @@ class ModeTile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         sendRequest(device, modeName);
-        ControlScreen.setMode(modeName);
+        // ControlScreen.setMode(modeName);
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 10),

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:led_control/data/device_modes.dart';
 import 'package:led_control/widgets/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // reference: https://flutter.dev/docs/cookbook/persistence/key-value
 
 class RCControlScreen extends StatefulWidget {
+  final DeviceControl dc;
+
+  RCControlScreen({this.dc});
+
   @override
   _RCControlScreenState createState() => _RCControlScreenState();
 }
 
 class _RCControlScreenState extends State<RCControlScreen> {
-  double _redValue = 0;
-  double _greenValue = 0;
-  double _blueValue = 0;
-
   @override
   void initState() {
     super.initState();
@@ -31,7 +32,7 @@ class _RCControlScreenState extends State<RCControlScreen> {
         child: Column(
           children: [
             Text(
-              "Red: " + _redValue.round().toString(),
+              "Red: " + widget.dc.getRed().round().toString(),
               style: TextStyle(
                 color: Colors.red,
                 fontSize: 25,
@@ -39,13 +40,13 @@ class _RCControlScreenState extends State<RCControlScreen> {
               ),
             ),
             Slider(
-              value: _redValue,
+              value: widget.dc.getRed(),
               min: 0,
               max: 255,
-              label: _redValue.round().toString(),
+              label: widget.dc.getRed().round().toString(),
               onChanged: (double value) {
                 setState(() {
-                  _redValue = value;
+                  widget.dc.setRed(value);
                 });
               },
               onChangeEnd: (double value) => updateRGB(),
@@ -54,7 +55,7 @@ class _RCControlScreenState extends State<RCControlScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              "Green: " + _greenValue.round().toString(),
+              "Green: " + widget.dc.getGreen().round().toString(),
               style: TextStyle(
                 color: Colors.green,
                 fontSize: 25,
@@ -62,13 +63,13 @@ class _RCControlScreenState extends State<RCControlScreen> {
               ),
             ),
             Slider(
-              value: _greenValue,
+              value: widget.dc.getGreen(),
               min: 0,
               max: 255,
-              label: _greenValue.round().toString(),
+              label: widget.dc.getGreen().round().toString(),
               onChanged: (double value) {
                 setState(() {
-                  _greenValue = value;
+                  widget.dc.setGreen(value);
                 });
               },
               onChangeEnd: (double value) => updateRGB(),
@@ -77,7 +78,7 @@ class _RCControlScreenState extends State<RCControlScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              "Blue: " + _blueValue.round().toString(),
+              "Blue: " + widget.dc.getBlue().round().toString(),
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 25,
@@ -85,13 +86,13 @@ class _RCControlScreenState extends State<RCControlScreen> {
               ),
             ),
             Slider(
-              value: _blueValue,
+              value: widget.dc.getBlue(),
               min: 0,
               max: 255,
-              label: _blueValue.round().toString(),
+              label: widget.dc.getBlue().round().toString(),
               onChanged: (double value) {
                 setState(() {
-                  _blueValue = value;
+                  widget.dc.setBlue(value);
                 });
               },
               onChangeEnd: (double value) => updateRGB(),
@@ -111,21 +112,26 @@ class _RCControlScreenState extends State<RCControlScreen> {
   _loadRGB() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
-      _redValue = (pref.get('red') ?? 0);
-      _greenValue = (pref.get('green') ?? 0);
-      _blueValue = (pref.get('blue') ?? 0);
+      print("Loading for: " + widget.dc.getName());
+      widget.dc.setRed(pref.get(widget.dc.getName() + 'red') ?? 0);
+      widget.dc.setGreen(pref.get(widget.dc.getName() + 'green') ?? 0);
+      widget.dc.setBlue(pref.get(widget.dc.getName() + 'blue') ?? 0);
     });
   }
 
   updateRGB() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      prefs.setDouble('red', _redValue);
-      prefs.setDouble('green', _greenValue);
-      prefs.setDouble('blue', _blueValue);
+      print("Updating for: " + widget.dc.getName());
+      prefs.setDouble(widget.dc.getName() + 'red', widget.dc.getRed());
+      prefs.setDouble(widget.dc.getName() + 'green', widget.dc.getGreen());
+      prefs.setDouble(widget.dc.getName() + 'blue', widget.dc.getBlue());
+      print("Prefs: " + prefs.toString());
     });
-    sendRGB(_redValue.round().toString(), _greenValue.round().toString(),
-        _blueValue.round().toString());
+    sendRGB(
+        widget.dc.getRed().round().toString(),
+        widget.dc.getGreen().round().toString(),
+        widget.dc.getBlue().round().toString());
   }
 }
 
