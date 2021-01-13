@@ -126,7 +126,7 @@ class _RCControlScreenState extends State<RCControlScreen> {
       prefs.setDouble(widget.dc.getName() + 'red', widget.dc.getRed());
       prefs.setDouble(widget.dc.getName() + 'green', widget.dc.getGreen());
       prefs.setDouble(widget.dc.getName() + 'blue', widget.dc.getBlue());
-      print("Prefs: " + prefs.toString());
+      print(prefs);
     });
     sendRGB(
         widget.dc.getRed().round().toString(),

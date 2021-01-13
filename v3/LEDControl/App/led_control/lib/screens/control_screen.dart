@@ -180,8 +180,6 @@ class _ControlScreenState extends State<ControlScreen> {
         prefs.setDouble(widget.dc.getName() + 'green', widget.dc.getGreen());
         prefs.setDouble(widget.dc.getName() + 'blue', widget.dc.getBlue());
       }
-
-      print("Prefs: " + prefs.toString());
     });
     sendRGB(
         widget.dc.getName().toLowerCase(),

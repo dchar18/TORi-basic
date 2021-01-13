@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:led_control/data/device_modes.dart';
 import 'package:led_control/screens/add_device_screen.dart';
 import 'package:led_control/screens/control_screen.dart';
+import 'package:led_control/screens/door_sensor_control.dart';
 import 'package:led_control/screens/rc_control_screen.dart';
 
-List<String> devices = ["All", "Bed", "Desk", "RC Lambo"];
+List<String> devices = ["Door Sensor", "All", "Bed", "Desk", "RC Lambo"];
 
 Widget deviceList() {
   return ListView.builder(
@@ -33,7 +34,9 @@ class DeviceTile extends StatelessWidget {
         MaterialPageRoute(
           builder: (_) => deviceName == "RC Lambo"
               ? RCControlScreen(dc: new DeviceControl(this.deviceName))
-              : ControlScreen(dc: new DeviceControl(this.deviceName)),
+              : deviceName == "Door Sensor"
+                  ? DoorSensorControl()
+                  : ControlScreen(dc: new DeviceControl(this.deviceName)),
         ),
       ),
       child: Container(
@@ -59,6 +62,40 @@ class DeviceTile extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget doorTile(BuildContext context) {
+  final itemHeight = (MediaQuery.of(context).size.height) / 10;
+
+  return GestureDetector(
+    onTap: () => Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DoorSensorControl(),
+      ),
+    ),
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      height: itemHeight,
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          "Door Sensor",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 30,
+              color: Colors.grey[800],
+              fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ),
+  );
 }
 
 Widget myAppBar(BuildContext context, String title) {
