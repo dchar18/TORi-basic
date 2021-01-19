@@ -11,10 +11,30 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: myAppBar(context, "LED Control"),
       body: Container(
-        child: deviceList(),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: backgroundGradient(),
+        child: Column(
+          children: [
+            SizedBox(height: 30),
+            Container(
+              height: 75,
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.only(top: 20, left: 25),
+              child: Text(
+                "Devices",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 35,
+                    fontWeight: FontWeight.normal,
+                    fontFamily: 'Roboto'),
+              ),
+              alignment: Alignment.centerLeft,
+            ),
+            Expanded(child: deviceList()),
+          ],
+        ),
       ),
     );
   }

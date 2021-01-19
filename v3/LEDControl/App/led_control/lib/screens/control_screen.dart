@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:led_control/data/device_modes.dart';
+import 'package:led_control/widgets/slider_widget.dart';
 import 'package:led_control/widgets/widgets.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,12 @@ class ControlScreen extends StatefulWidget {
 }
 
 class _ControlScreenState extends State<ControlScreen> {
+  Color red = Color(0xffef5350);
+  Color green = Color(0xff9ccc65);
+  // Color green = Color(0xff81c784);
+  // Color blue = Color(0xff64b5f6);
+  Color blue = Color(0xff4fc3f7);
+
   @override
   void initState() {
     super.initState();
@@ -22,112 +29,78 @@ class _ControlScreenState extends State<ControlScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: myAppBar(context, widget.dc.getName()),
-      body: Container(
+    return Material(
+      child: Container(
+        decoration: backgroundGradient(),
         width: MediaQuery.of(context).size.width,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 30),
             Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 10, bottom: 5, right: 15, left: 20),
-              child: Row(
-                children: [
-                  Text(
-                    "Current mode: ",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    widget.dc.getName(),
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              height: 75,
+              width: MediaQuery.of(context).size.width,
+              padding:
+                  EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 10),
+              child: Text(
+                widget.dc.getName(),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 35,
+                    fontWeight: FontWeight.normal,
+                    fontFamily: 'Roboto'),
               ),
+              alignment: Alignment.centerLeft,
             ),
-            Column(
-              children: [
-                Text(
-                  "Red: " + widget.dc.getRed().round().toString(),
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Slider(
-                  value: widget.dc.getRed(),
-                  min: 0,
-                  max: 255,
-                  label: widget.dc.getRed().round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      widget.dc.setRed(value);
-                    });
-                  },
-                  onChangeEnd: (double value) => updateRGB(),
-                  activeColor: Colors.red,
-                  inactiveColor: Colors.red[300],
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Green: " + widget.dc.getGreen().round().toString(),
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Slider(
-                  value: widget.dc.getGreen(),
-                  min: 0,
-                  max: 255,
-                  label: widget.dc.getGreen().round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      widget.dc.setGreen(value);
-                    });
-                  },
-                  onChangeEnd: (double value) => updateRGB(),
-                  activeColor: Colors.green,
-                  inactiveColor: Colors.green[300],
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Blue: " + widget.dc.getBlue().round().toString(),
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Slider(
-                  value: widget.dc.getBlue(),
-                  min: 0,
-                  max: 255,
-                  label: widget.dc.getBlue().round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      widget.dc.setBlue(value);
-                    });
-                  },
-                  onChangeEnd: (double value) => updateRGB(),
-                  activeColor: Colors.blue,
-                  inactiveColor: Colors.blue[300],
-                ),
-                SizedBox(height: 20),
-              ],
+            sliderText("Red", widget.dc.getRed(), red),
+            Slider(
+              value: widget.dc.getRed(),
+              min: 0,
+              max: 255,
+              label: widget.dc.getRed().round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  widget.dc.setRed(value);
+                });
+              },
+              onChangeEnd: (double value) => updateRGB(),
+              activeColor: Colors.red,
+              inactiveColor: Colors.red[300],
             ),
+            SizedBox(height: 10),
+            sliderText("Green", widget.dc.getGreen(), green),
+            Slider(
+              value: widget.dc.getGreen(),
+              min: 0,
+              max: 255,
+              label: widget.dc.getGreen().round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  widget.dc.setGreen(value);
+                });
+              },
+              onChangeEnd: (double value) => updateRGB(),
+              activeColor: Colors.green,
+              inactiveColor: Colors.green[300],
+            ),
+            SizedBox(height: 10),
+            sliderText("Blue", widget.dc.getBlue(), blue),
+            Slider(
+              value: widget.dc.getBlue(),
+              min: 0,
+              max: 255,
+              label: widget.dc.getBlue().round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  widget.dc.setBlue(value);
+                });
+              },
+              onChangeEnd: (double value) => updateRGB(),
+              activeColor: Colors.blue,
+              inactiveColor: Colors.blue[300],
+            ),
+            SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
