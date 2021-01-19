@@ -18,6 +18,10 @@ mqttc.loop_start()
 # 'status' indicates whether or not the board is connected to the server
 
 boards = {
+    'esp8266_door' : {
+        'name' : 'esp8266_door', 
+        'option' : 'on', 
+    },
     'esp8266_desk' : {
         'name' : 'esp8266_desk', 
         'mode' : 'off', 
@@ -85,8 +89,9 @@ def action(board, mode):
 def sync(mode):
     print('Entering sync(',mode,')')
     for b in boards:
-        # update the board's mode
-        boards[b]['mode'] = mode
+        if b != 'esp8266_door':
+            # update the board's mode
+            boards[b]['mode'] = mode
 
     for i in boards:
         print(i,': ',boards[i])
@@ -96,6 +101,29 @@ def sync(mode):
     }
 
     mqttc.publish(mode, "all")
+    return render_template('main.html', **serverData)
+
+
+@app.route("/<mode>/sync/<red>/<green>/<blue>")
+def syncRGB(mode, red, green, blue):
+    print('Entering syncRGB(', mode, ',', red, ',', green, ',', blue, ')')
+    for b in boards:
+        if b != 'esp8266_door':
+            # update the board's mode
+            boards[b]['mode'] = mode
+            boards[b]['rgb']['red'] = int(red)
+            boards[b]['rgb']['green'] = int(green)
+            boards[b]['rgb']['blue'] = int(blue)
+
+    for i in boards:
+        print(i,': ',boards[i])
+
+    serverData = {
+        'boards' : boards
+    }
+
+    message = red + '/' + green + '/' + blue
+    mqttc.publish("all/rgb", message)
     return render_template('main.html', **serverData)
 
 # this funciton is executed when the RGB sliders are used in the Flutter application
@@ -112,10 +140,35 @@ def rgb(board, mode, red, green, blue):
         'boards' : boards
     }
      
-     topic = str(board) + '/rgb'
+     topic = target_board + '/rgb'
      message = red + '/' + green + '/' + blue
      mqttc.publish(topic, message)
      return render_template('main.html', **serverData)
+
+@app.route("/esp8266_door/<option>")
+def doorOption(option):
+    if option == 'toggle':
+        # switch to opposite state
+        if boards['esp8266_door']['option'] == 'on':
+            boards['esp8266_door']['option'] = 'off'
+        elif boards['esp8266_door']['option'] == 'off':
+            boards['esp8266_door']['option'] = 'on'
+    # set back to 'on'
+    elif option == 'reset':
+        boards['esp8266_door']['option'] = 'on'
+    # set to 'keep_on' or 'keep_off'
+    else:
+        boards['esp8266_door']['option'] = option
+
+    serverData = {
+        'boards' : boards
+    }
+
+    topic = 'esp8266_door'
+    message = option
+    mqttc.publish(topic, message)
+    return render_template('main.html', **serverData)
+    
 
 
 def shutdown_server():

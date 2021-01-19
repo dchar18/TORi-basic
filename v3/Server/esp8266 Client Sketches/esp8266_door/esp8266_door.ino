@@ -34,41 +34,51 @@ PubSubClient client(espClient);
 HTTPClient http;
 
 // Ultrasonic Distance Sensor Variables --------------------
-#define INTERVAL 100 // determines how frequently the distance is checked
-#define THRESHOLD 10 // determines how much the distance can vary by to trigger a change in state (in centimeters)
+#define INTERVAL 75 // determines how frequently the distance is checked
+#define THRESHOLD 15 // determines how much the distance can vary by to trigger a change in state (in centimeters)
 #define MAX_DISTANCE 250
-#define ECHO    D1
-#define TRIGGER D2
+#define ECHO_INNER    D1
+#define TRIGGER_INNER D2
+#define ECHO_OUTER    D5
+#define TRIGGER_OUTER D6
 #define FLAG    D0
 #define PRESENT D4 // LOW when no one in room, HIGH when present
-NewPing sensor = NewPing(TRIGGER, ECHO, MAX_DISTANCE);
+NewPing sensor_inner = NewPing(TRIGGER_INNER, ECHO_INNER, MAX_DISTANCE);
+NewPing sensor_outer = NewPing(TRIGGER_OUTER, ECHO_OUTER, MAX_DISTANCE);
 
 // device 0: esp8266_bed
 // device 1: esp8266_desk
 // device 2: esp8266_rclambo
-uint8_t num_devices = 3;
+const uint8_t num_devices = 3;
 String devices[] = {"esp8266_bed", "esp8266_desk", "esp8266_rclambo"};
 String prev_modes[] = {"off", "off", "rgb"};
-int rgb_vals[] = {0,0,255};
+int rgb_vals[num_devices][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
+// these two flags are used to determine whether both sensors detected movement
+// if only one flag is set to true, then don't react
+//  - if FLAG_inner is true but FLAG_outer is false (or vice versa), then the door was closed/opened -> don't react
+//  - if both are set to true, then someone passed by the door, so trigger a change in the present variable
+boolean FLAG_inner = false;
+boolean FLAG_outer = false;
+boolean react = false; // true when FLAG_inner && FLAG_outer == true
 boolean present = true;
-uint8_t distance = -1;
-int prev_time = 0;
+boolean SENSOR_ON  = true; // used to determine whether the sensors should receive readings
+
+#define TIMEOUT 200 // determines how long each FLAG_* will remain true before being reset
+uint8_t distance_inner = -1; // store distance read using sensor inside the room
+int time_activated_in = 0; // store the time at which the sensor was activated (if too much time passed since activation, reset FLAG_inner)
+uint8_t distance_outer = -1;
+int time_activated_out = 0;
+
 int curr_time = 0;
-int last_change = 0;
-//int total = 0;
-//double avg = 0; // keeps track of the average over 10 readings to prevent alternation when something is constantly in front of the sensor
+int prev_time = 0;
+int last_change = 0; // stores the last time a http request was made (limits how frequently a call is made)
 
 void setup() {
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-
-  // .connect(HOST_NAME, HTTP_PORT)
-//  if(http_client.connect("192.168.50.114", )){
-//    Serial.println("Connected to server");
-//  }
 
   pinMode(FLAG, OUTPUT);
   digitalWrite(FLAG, LOW);
@@ -82,73 +92,92 @@ void loop() {
     reconnect();
   }
   if(!client.loop()){
-     /*
-     YOU  NEED TO CHANGE THIS NEXT LINE, IF YOU'RE HAVING PROBLEMS WITH MQTT MULTIPLE CONNECTIONS
-     To change the ESP device ID, you will have to give a unique name to the ESP8266.
-     Here's how it looks like now:
-       client.connect("ESP8266Client");
-     If you want more devices connected to the MQTT broker, you can do it like this:
-       client.connect("ESPOffice");
-     Then, for the other ESP:
-       client.connect("ESPGarage");
-      That should solve your MQTT multiple connections problem
-
-     THE SECTION IN recionnect() function should match your device name
-    */
     client.connect(device_ID);
   }
 
   curr_time = millis();
-  if(curr_time - prev_time >= INTERVAL){
-    prev_time = curr_time;
+
+  if(SENSOR_ON){
     // check distance
-    distance = sensor.ping_cm();
-//    total += distance;
+    distance_inner = sensor_inner.ping_cm();
+    distance_outer = sensor_outer.ping_cm();
 
-    Serial.println(distance);
-    if(distance > 15){
-      if(distance - 38 < THRESHOLD){
-        if(curr_time - last_change >= 1000){
-          last_change = curr_time;
-          present = !present;
+    // reset flags if timeout
+    if(curr_time - time_activated_in >= TIMEOUT){
+      FLAG_inner = false;
+    }
+    if(curr_time - time_activated_out >= TIMEOUT){
+      FLAG_outer = false;
+    }
 
-          Serial.println("MAKING HTTP REQUEST");
-          if(present){
-            Serial.println("\tON");
-            digitalWrite(PRESENT, HIGH);
+    // update flags
+    // use abs() in case distance_* is less than 38 (due to electrical errors)
+    if(abs(distance_inner - 38) < THRESHOLD){
+      FLAG_inner = true;
+      time_activated_in = millis();
+    }
+    if(abs(distance_outer - 38) < THRESHOLD){
+      FLAG_outer = true;
+      time_activated_out = millis();
+    }
 
-            for(int i = 0; i < num_devices; i++){
-              String url = "http://192.168.50.114:8181/" + devices[i] + "/" + prev_modes[i];
-              if(prev_modes[i] == "rgb"){
-                for(int j = 0; j < 3; j++){
-                  url = url + "/" + String(rgb_vals[j]);
-                }
+    Serial.print(distance_inner);
+    Serial.print(",");
+    Serial.println(distance_outer);
+//
+    Serial.print("\t");
+    Serial.print(FLAG_inner);
+    Serial.print(",");
+    Serial.println(FLAG_outer);
+
+    // check if both sensors were triggered
+    if(FLAG_inner && FLAG_outer){
+      react = true;
+      // reset flags
+      FLAG_outer = false;
+      FLAG_inner = false;
+    }
+    else{
+      react = false;
+    }
+
+    if(react){
+      if(curr_time - last_change >= 1000){
+//        Serial.println("< TRIGGERED >");
+        last_change = millis();
+        present = !present;
+//        Serial.println("< FLIPPED >");
+
+        // make HTTP request
+        if(present){
+//          Serial.println("\tON");
+          digitalWrite(PRESENT, HIGH);
+
+//          Serial.println("MAKING HTTP REQUEST");
+          for(int i = 0; i < num_devices; i++){
+            String url = "http://192.168.50.114:8181/" + devices[i] + "/" + prev_modes[i];
+            if(prev_modes[i] == "rgb"){
+              for(int j = 0; j < 3; j++){
+                url = url + "/" + String(rgb_vals[i][j]);
               }
-              Serial.println("\t" + url);
-              http.begin(url);
-              int httpCode = http.GET();
-              http.end(); 
             }
-            
-          }
-          else{
-            Serial.println("\tOFF");
-            digitalWrite(PRESENT, LOW);
-            http.begin("http://192.168.50.114:8181/off/sync");
+//            Serial.println("\t" + url);
+            http.begin(url);
             int httpCode = http.GET();
             http.end(); 
-          }
-          
-//          int httpCode = http.GET();            //Send the request
-//          String payload = http.getString();
-//          Serial.println("\tCode: " + httpCode);   //Print HTTP return code
-//          http.end(); 
+          } 
+        } // end if(present)
+        // present == false
+        else{
+//          Serial.println("\tOFF");
+          digitalWrite(PRESENT, LOW);
+          http.begin("http://192.168.50.114:8181/off/sync");
+          int httpCode = http.GET();
+          http.end(); 
         }
       }
     }
   }
-  
-  
 }
 
 // HELPER FUNCTIONS -------------------------------------------------------------------------------
@@ -187,9 +216,30 @@ void callback(String topic, byte* message, unsigned int length) {
   /* (topic, message) format options: 
    *  1 - (<board>/<mode>, <board>)
    *  2 - (<mode>, "all")
-   *  3 - (<board>/rbg, <red>/<green>/<blue>)
+   *  3 - (<board>/rgb, <red>/<green>/<blue>)
+   *  4 - (all/rgb, <red>/<green>/<blue>)
+   *  5 - (esp8266_door, <option>)
   */ 
 
+  // option 5
+  if(topic == "esp8266_door"){
+    if(messageTemp == "toggle"){
+      present = !present;
+    }
+    else if(messageTemp == "reset"){
+      present = true;
+      SENSOR_ON = true;
+    }
+    else{
+      if(messageTemp == "keep_on"){
+        present = true;
+      }
+      else if(messageTemp == "keep_off"){
+        present = false;
+      }
+      SENSOR_ON = false;
+    }
+  }
   if(topic != "off"){
     Serial.println("\tUPDATING...");
     // option 2
@@ -204,28 +254,52 @@ void callback(String topic, byte* message, unsigned int length) {
       topic_temp = topic_temp.substring(topic_temp.indexOf("/")+1);
       String device_mode = topic_temp;
       
-      // option 3
       if(device_mode == "rgb"){
         String temp = messageTemp;
-        rgb_vals[0] = temp.substring(0,temp.indexOf("/")).toInt();
+        uint8_t red = temp.substring(0,temp.indexOf("/")).toInt();
         temp = temp.substring(temp.indexOf("/")+1);
     
-        rgb_vals[1] = temp.substring(0,temp.indexOf("/")).toInt();
+        uint8_t green = temp.substring(0,temp.indexOf("/")).toInt();
         temp = temp.substring(temp.indexOf("/")+1);
     
-        rgb_vals[2] = temp.toInt(); 
+        uint8_t blue = temp.toInt();
+
+         // option 4
+         if(device == "all"){
+          // update every board's rgb values
+          for(int i = 0; i < num_devices; i++){
+            rgb_vals[i][0] = red;
+            rgb_vals[i][1] = green;
+            rgb_vals[i][2] = blue;
+            prev_modes[i] = "rgb";
+          }
+         }
+         // option 3
+         else{
+          int device_index = -1;
+          for(int i = 0; i < num_devices; i++){
+            if(device == devices[i]){
+              device_index = i;
+            }
+          }
+          // update target board's rgb values
+          rgb_vals[device_index][0] = red;
+          rgb_vals[device_index][1] = green;
+          rgb_vals[device_index][2] = blue;
+          prev_modes[device_index] = "rgb";
+         }
       }
       // option 1
       else{
-        if(device == "esp8266_bed"){
-          prev_modes[0] = device_mode;
+        // find the device's corresponding index
+        int device_index = -1;
+        for(int i = 0; i < num_devices; i++){
+          if(device == devices[i]){
+            device_index = i;
+          }
         }
-        else if(device == "esp8266_desk"){
-          prev_modes[1] = device_mode;
-        }
-        else if(device == "esp8266_rclambo"){
-          prev_modes[2] = device_mode;
-        }
+        // update the mode
+        prev_modes[device_index] = device_mode;
       }
     }
   }

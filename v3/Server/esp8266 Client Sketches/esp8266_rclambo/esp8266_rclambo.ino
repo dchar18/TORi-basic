@@ -109,6 +109,7 @@ void callback(String topic, byte* message, unsigned int length) {
   }
   // message is "<red>/<green>/<blue>"
   // parse the RGB values
+  // accepts the following topics: "all/sync", "esp8266_rclambo/rgb"
   else{
     String temp = messageTemp;
     red = temp.substring(0,temp.indexOf("/")).toInt();
@@ -139,6 +140,7 @@ void reconnect() {
       client.subscribe(mode_rainbow);
       client.subscribe(mode_rgb);
       client.subscribe("off");
+      client.subscribe("all/rgb");
     } else {
       /* Error codes:
        * -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
