@@ -81,6 +81,7 @@ class DeviceControl {
     this.rgb['red'] = 0.0;
     this.rgb['green'] = 0.0;
     this.rgb['blue'] = 0.0;
+    this.rgb['brightness'] = 65.0;
   }
 
   String getName() {
@@ -117,5 +118,13 @@ class DeviceControl {
 
   void setBlue(double blue) {
     this.rgb['blue'] = blue;
+  }
+
+  getBrightness() {
+    return this.rgb['brightness'];
+  }
+
+  void setBrightness(double brightness) {
+    this.rgb['brightness'] = brightness;
   }
 }

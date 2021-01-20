@@ -20,6 +20,7 @@ class _ControlScreenState extends State<ControlScreen> {
   // Color green = Color(0xff81c784);
   // Color blue = Color(0xff64b5f6);
   Color blue = Color(0xff4fc3f7);
+  Color white = Colors.white;
 
   @override
   void initState() {
@@ -100,6 +101,24 @@ class _ControlScreenState extends State<ControlScreen> {
               activeColor: Colors.blue,
               inactiveColor: Colors.blue[300],
             ),
+            SizedBox(height: 10),
+            sliderText("Brightness", widget.dc.getBrightness(), white),
+            Slider(
+              value: widget.dc.getBrightness(),
+              min: 0,
+              max: 255,
+              label: widget.dc.getBrightness().round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  widget.dc.setBrightness(value);
+                });
+              },
+              onChangeEnd: (double value) => sendBrightness(
+                  widget.dc.getName().toLowerCase(),
+                  widget.dc.getBrightness().round().toString()),
+              activeColor: Colors.white,
+              inactiveColor: Colors.white70,
+            ),
             SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
@@ -135,6 +154,8 @@ class _ControlScreenState extends State<ControlScreen> {
       widget.dc.setRed(pref.get(widget.dc.getName() + 'red') ?? 0.0);
       widget.dc.setGreen(pref.get(widget.dc.getName() + 'green') ?? 0.0);
       widget.dc.setBlue(pref.get(widget.dc.getName() + 'blue') ?? 0.0);
+      widget.dc
+          .setBrightness(pref.get(widget.dc.getName() + 'brightness') ?? 0.0);
     });
   }
 
@@ -147,13 +168,18 @@ class _ControlScreenState extends State<ControlScreen> {
           prefs.setDouble(devices[i] + 'red', widget.dc.getRed());
           prefs.setDouble(devices[i] + 'green', widget.dc.getGreen());
           prefs.setDouble(devices[i] + 'blue', widget.dc.getBlue());
+          prefs.setDouble(devices[i] + 'brightness', widget.dc.getBrightness());
         }
       } else {
         prefs.setDouble(widget.dc.getName() + 'red', widget.dc.getRed());
         prefs.setDouble(widget.dc.getName() + 'green', widget.dc.getGreen());
         prefs.setDouble(widget.dc.getName() + 'blue', widget.dc.getBlue());
+        prefs.setDouble(
+            widget.dc.getName() + 'brightness', widget.dc.getBrightness());
       }
     });
+    sendBrightness(widget.dc.getName().toLowerCase(),
+        widget.dc.getBrightness().round().toString());
     sendRGB(
         widget.dc.getName().toLowerCase(),
         widget.dc.getRed().round().toString(),
@@ -166,12 +192,27 @@ class _ControlScreenState extends State<ControlScreen> {
     String combination = red + "/" + green + "/" + blue;
     String address = "http://192.168.50.114:8181/";
     if (name == "all") {
-      address = address + "rgb/sync/" + combination;
+      address = address + "sync/rgb/" + combination;
     } else {
       address = address + "esp8266_" + name + "/rgb/" + combination;
     }
     print("Sending combination " + combination + " to " + address);
 
+    final response = await get(address);
+    // print(response.body);
+    print("Response code: " + response.statusCode.toString());
+  }
+
+  sendBrightness(String name, String brightness) async {
+    String request;
+    if (name == "all") {
+      request = "sync/brightness/" + brightness;
+    } else {
+      request = "esp8266_" + name + "/brightness/" + brightness;
+    }
+    String address = "http://192.168.50.114:8181/" + request;
+
+    print("Sending to " + address);
     final response = await get(address);
     // print(response.body);
     print("Response code: " + response.statusCode.toString());
@@ -186,9 +227,11 @@ void sendRequest(String device, String mode) async {
     mode = mode.replaceAll(" twinkle", "");
     print("current mode: " + mode);
     mode = "twinkle_" + mode;
+  } else {
+    mode = mode.replaceAll(" ", "_");
   }
   if (device == "All") {
-    url = "http://192.168.50.114:8181/" + mode.toLowerCase() + "/sync";
+    url = "http://192.168.50.114:8181/sync/" + mode.toLowerCase();
   } else {
     url = "http://192.168.50.114:8181/esp8266_" +
         device.toLowerCase() +

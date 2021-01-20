@@ -208,7 +208,6 @@ backgroundGradient() {
 
 List<String> modes = [
   "Off",
-  "Random",
   "Christmas",
   "Study",
   "Party",
@@ -216,7 +215,9 @@ List<String> modes = [
   "Blue twinkle",
   "Green twinkle",
   "Snow",
-  "Fire"
+  "Fire",
+  "Blue Fire",
+  "Lava"
 ];
 
 Widget modeList(String device) {
