@@ -28,7 +28,7 @@ const char* device_ID = "esp8266_desk";
 
 // done explicitly to avoid char/char*/String conversions and concatenations
 const char* mode_off = "esp8266_desk/off";
-const char* mode_random = "esp8266_desk/random";
+//const char* mode_random = "esp8266_desk/random";
 const char* mode_christmas = "esp8266_desk/christmas";
 const char* mode_study = "esp8266_desk/study";
 const char* mode_party = "esp8266_desk/party";
@@ -36,8 +36,11 @@ const char* mode_twinkle_christmas = "esp8266_desk/twinkle_christmas";
 const char* mode_twinkle_blue = "esp8266_desk/twinkle_blue";
 const char* mode_twinkle_green = "esp8266_desk/twinkle_green";
 const char* mode_snow = "esp8266_desk/snow";
+const char* mode_lava = "esp8266_desk/lava";
 const char* mode_fire = "esp8266_desk/fire";
+const char* mode_blue_fire = "esp8266_desk/blue_fire";
 const char* mode_rgb = "esp8266_desk/rgb";
+const char* mode_brightness = "esp8266_desk/brightness";
 int red = 0;
 int green = 0;
 int blue = 255;
@@ -67,8 +70,8 @@ CRGB leds[NUM_LEDS];
 int count = 0;
 int _delay = 10;
 int UPDATES_PER_SECOND = 400;
-int NUM_COLOR_MODES = 9;
-String modes[] = {"rgb", "christmas", "study", "party", "twinkle_christmas", "twinkle_blue", "twinkle_green", "snow", "fire"};
+//int NUM_COLOR_MODES = 9;
+//String modes[] = {"rgb", "christmas", "study", "party", "twinkle_christmas", "twinkle_blue", "twinkle_green", "snow", "fire"};
 
 // used for the "twinkle" modes ---------------------
 // Overall twinkle speed.
@@ -110,6 +113,7 @@ CRGBPalette16 targetPalette;
 #define SPARKING 120
 
 bool gReverseDirection = false;
+CRGBPalette16 gPal;
 
 // --------------------------------------------------
 
@@ -157,10 +161,10 @@ void callback(String topic, byte* message, unsigned int length) {
       Serial.println("All changing to \'off\'");
       led_mode = "off";
     }
-    else if(topic == "random"){
-      Serial.println("All changing to \'random\'");
-      led_mode = "random";
-    }
+//    else if(topic == "random"){
+//      Serial.println("All changing to \'random\'");
+//      led_mode = "random";
+//    }
     else if(topic == "christmas"){
       Serial.println("All changing to \'christmas\'");
       led_mode = "christmas";
@@ -193,6 +197,14 @@ void callback(String topic, byte* message, unsigned int length) {
       Serial.println("All changing to \'fire\'");
       led_mode = "fire";
     }
+    else if(topic == "blue_fire"){
+      Serial.println("All changing to \'fire\'");
+      led_mode = "blue_fire";
+    }
+    else if(topic == "lava"){
+      Serial.println("All changing to \'lava\'");
+      led_mode = "lava";
+    }
   }
   // only the device with matching ID should respond
   else if(messageTemp.equals(ID)){
@@ -200,10 +212,10 @@ void callback(String topic, byte* message, unsigned int length) {
       Serial.println(ID + " changing to \'off\'");
       led_mode = "off";
     }
-    else if(topic == mode_random){
-      Serial.println(ID + " changing to \'random\'");
-      led_mode = "random";
-    }
+//    else if(topic == mode_random){
+//      Serial.println(ID + " changing to \'random\'");
+//      led_mode = "random";
+//    }
     else if(topic == mode_christmas){
       Serial.println(ID + " changing to \'christmas\'");
       led_mode = "christmas";
@@ -236,6 +248,21 @@ void callback(String topic, byte* message, unsigned int length) {
       Serial.println(ID + " changing to \'fire\'");
       led_mode = "fire";
     }
+    else if(topic == mode_blue_fire){
+      Serial.println(ID + " changing to \'blue_fire\'");
+      led_mode = "blue_fire";
+    }
+    else if(topic == mode_lava){
+      Serial.println(ID + " changing to \'lava\'");
+      led_mode = "lava";
+    }
+  }
+  // responding to topic: all/brightness, message: <brightness>
+  else if(topic == "all/brightness" || topic == mode_brightness){
+    BRIGHTNESS = messageTemp.toInt();
+    FastLED.setBrightness(BRIGHTNESS);
+    Serial.print("Brightness: ");
+    Serial.println(BRIGHTNESS);
   }
   // responding to topic: all/rgb, message: <red>/<green>/<blue>
   else{
@@ -278,7 +305,7 @@ void reconnect() {
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
       client.subscribe(mode_off);
-      client.subscribe(mode_random);
+//      client.subscribe(mode_random);
       client.subscribe(mode_christmas);
       client.subscribe(mode_study);
       client.subscribe(mode_party);
@@ -287,9 +314,12 @@ void reconnect() {
       client.subscribe(mode_twinkle_green);
       client.subscribe(mode_snow);
       client.subscribe(mode_fire);
+      client.subscribe(mode_blue_fire);
+      client.subscribe(mode_lava);
       client.subscribe(mode_rgb);
+      client.subscribe(mode_brightness);
       client.subscribe("off");
-      client.subscribe("random");
+//      client.subscribe("random");
       client.subscribe("christmas");
       client.subscribe("study");
       client.subscribe("party");
@@ -298,7 +328,10 @@ void reconnect() {
       client.subscribe("twinkle_green");
       client.subscribe("snow");
       client.subscribe("fire");
+      client.subscribe("blue_fire");
+      client.subscribe("lava");
       client.subscribe("all/rgb");
+      client.subscribe("all/brightness");
     } else {
       /* Error codes:
        * -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
@@ -382,21 +415,20 @@ void loop() {
     }
     setRGB();
   }
-  else if(led_mode == "random"){
-    // check the current mode is running its first iteration after off()
-    if(prev_mode == "off"){
-      startIndex = 0;
-      prev_mode = "random";
-    }
-    random_mode(startIndex);
-  }
+//  else if(led_mode == "random"){
+//    // check the current mode is running its first iteration after off()
+//    if(prev_mode == "off"){
+//      startIndex = 0;
+//      prev_mode = "random";
+//    }
+//    random_mode(startIndex);
+//  }
   else if(led_mode == "christmas"){
     if(prev_mode == "off"){
       startIndex = 0;
       prev_mode = "christmas";
     }
     UPDATES_PER_SECOND = 250;
-    BRIGHTNESS = 65;
     currentPalette = ChristmasColors_p;
     use_palette(startIndex);
   }
@@ -406,7 +438,6 @@ void loop() {
       prev_mode = "study";
     }
     UPDATES_PER_SECOND = 200;
-    BRIGHTNESS = 65;
     currentPalette = StudyColors_p;
     use_palette(startIndex);
   }
@@ -416,7 +447,6 @@ void loop() {
       prev_mode = "party";
     }
     UPDATES_PER_SECOND = 800;
-    BRIGHTNESS = 100;
     currentPalette = RainbowColors_p;
     use_palette(startIndex);
   }
@@ -426,7 +456,6 @@ void loop() {
       prev_mode = "twinkle_christmas";
     }
     UPDATES_PER_SECOND = 400;
-    BRIGHTNESS = 65;
     currentPalette = RedGreenWhite_p;
     twinkle();
   }
@@ -436,7 +465,6 @@ void loop() {
       prev_mode = "twinkle_blue";
     }
     UPDATES_PER_SECOND = 400;
-    BRIGHTNESS = 65;
     currentPalette = Ice_p;
     twinkle();
   }
@@ -446,7 +474,6 @@ void loop() {
       prev_mode = "twinkle_green";
     }
     UPDATES_PER_SECOND = 400;
-    BRIGHTNESS = 65;
     currentPalette = Holly_p;
     twinkle();
   }
@@ -456,7 +483,6 @@ void loop() {
       prev_mode = "snow";
     }
     UPDATES_PER_SECOND = 400;
-    BRIGHTNESS = 65;
     currentPalette = Snow_p;
     twinkle();
   }
@@ -466,8 +492,26 @@ void loop() {
       prev_mode = "fire";
     }
     UPDATES_PER_SECOND = 65;
-    BRIGHTNESS = 150;
+    gPal = HeatColors_p;
     fire();
+  }
+  else if(led_mode == "blue_fire"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "blue_fire";
+    }
+    UPDATES_PER_SECOND = 65;
+    gPal = BlueFireColors_p;
+    fire();
+  }
+  else if(led_mode == "lava"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "lava";
+    }
+    UPDATES_PER_SECOND = 800;
+    currentPalette = LavaColors1_p;
+    use_palette(startIndex);
   }
   FastLED.show();
   FastLED.delay(1000 / UPDATES_PER_SECOND);
@@ -479,35 +523,35 @@ void off(){
   FastLED.clear();
 }
 
-void random_mode(uint8_t colorIndex){
-  uint8_t rand_num = random(NUM_COLOR_MODES);
-  led_mode = modes[rand_num];
-  if(rand_num == 0){
-    setRGB();
-  }
-  else if(rand_num < 3){
-    use_palette(colorIndex);
-  }
-  else{
-    // christmas twinkle
-    if(rand_num == 3){
-      currentPalette = RedGreenWhite_p;
-    }
-    // twinkle blue
-    else if(rand_num == 4){
-      currentPalette = Ice_p;
-    }
-    // twinkle green
-    else if(rand_num == 5){
-      currentPalette = Holly_p;
-    }
-    // twinkle snow
-    else if(rand_num == 6){
-      currentPalette = Snow_p;
-    }
-    twinkle();
-  }
-}
+//void random_mode(uint8_t colorIndex){
+//  uint8_t rand_num = random(NUM_COLOR_MODES);
+//  led_mode = modes[rand_num];
+//  if(rand_num == 0){
+//    setRGB();
+//  }
+//  else if(rand_num < 3){
+//    use_palette(colorIndex);
+//  }
+//  else{
+//    // christmas twinkle
+//    if(rand_num == 3){
+//      currentPalette = RedGreenWhite_p;
+//    }
+//    // twinkle blue
+//    else if(rand_num == 4){
+//      currentPalette = Ice_p;
+//    }
+//    // twinkle green
+//    else if(rand_num == 5){
+//      currentPalette = Holly_p;
+//    }
+//    // twinkle snow
+//    else if(rand_num == 6){
+//      currentPalette = Snow_p;
+//    }
+//    twinkle();
+//  }
+//}
 
 void setRGB(){
   for( int i = 0; i < NUM_LEDS; i++) {
@@ -517,9 +561,9 @@ void setRGB(){
 }
 
 void use_palette(uint8_t colorIndex){
-  uint8_t brightness = 255;
+//  uint8_t brightness = 255;
   for( int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
+      leds[i] = ColorFromPalette( currentPalette, colorIndex, BRIGHTNESS, currentBlending);
       colorIndex += 3;
   }
   FastLED.show();
@@ -657,36 +701,39 @@ void coolLikeIncandescent( CRGB& c, uint8_t phase)
   c.b = qsub8( c.b, cooling * 2);
 }
 
-// source: FastLED example: Fire 2012
+// source: FastLED example: Fire 2012 w/ Palette
 void fire(){
-  // Array of temperature readings at each simulation cell
+// Array of temperature readings at each simulation cell
   static byte heat[NUM_LEDS];
 
   // Step 1.  Cool down every cell a little
-  for( int i = 0; i < NUM_LEDS; i++) {
-    heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
-  }
-
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for( int k= NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-  }
-  
-  // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-  if( random8() < SPARKING ) {
-    int y = random8(7);
-    heat[y] = qadd8( heat[y], random8(160,255) );
-  }
-
-  // Step 4.  Map from heat cells to LED colors
-  for( int j = 0; j < NUM_LEDS; j++) {
-    CRGB color = HeatColor( heat[j]);
-    int pixelnumber;
-    if( gReverseDirection ) {
-      pixelnumber = (NUM_LEDS-1) - j;
-    } else {
-      pixelnumber = j;
+    for( int i = 0; i < NUM_LEDS; i++) {
+      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
     }
-    leds[pixelnumber] = color;
-  }
+  
+    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    for( int k= NUM_LEDS - 1; k >= 2; k--) {
+      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+    }
+    
+    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+    if( random8() < SPARKING ) {
+      int y = random8(7);
+      heat[y] = qadd8( heat[y], random8(160,255) );
+    }
+
+    // Step 4.  Map from heat cells to LED colors
+    for( int j = 0; j < NUM_LEDS; j++) {
+      // Scale the heat value from 0-255 down to 0-240
+      // for best results with color palettes.
+      byte colorindex = scale8( heat[j], 240);
+      CRGB color = ColorFromPalette( gPal, colorindex);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      leds[pixelnumber] = color;
+    }
 }
