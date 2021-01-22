@@ -21,7 +21,14 @@ class _DoorSensorControlState extends State<DoorSensorControl> {
   // "keep off": set flag to "off" and turn sensor off
   // "keep on": set flag to "on" and turn sensor off
   // "reset": set flag to "on" and turn sensor on
-  List<String> options = ["Toggle", "Keep on", "Keep off", "Reset"];
+  // List<String> options = ["Toggle", "Keep on", "Keep off", "Reset"];
+  List<String> options = [
+    "Off",
+    "Red Stable",
+    "Red Pulse",
+    "Green Stable",
+    "Green Pulse"
+  ];
   Widget optionList() {
     return ListView.builder(
       shrinkWrap: true,
