@@ -42,7 +42,7 @@ HTTPClient http;
 #define ECHO_OUTER    D5
 #define TRIGGER_OUTER D6
 #define FLAG    D0
-#define PRESENT D4 // LOW when no one in room, HIGH when present
+#define PRESENT D3 // LOW when no one in room, HIGH when present
 NewPing sensor_inner = NewPing(TRIGGER_INNER, ECHO_INNER, MAX_DISTANCE);
 NewPing sensor_outer = NewPing(TRIGGER_OUTER, ECHO_OUTER, MAX_DISTANCE);
 
@@ -53,6 +53,35 @@ const uint8_t num_devices = 3;
 String devices[] = {"esp8266_bed", "esp8266_desk", "esp8266_rclambo"};
 String prev_modes[] = {"off", "off", "rgb"};
 int rgb_vals[num_devices][3] = {{0,0,0},{0,0,0},{0,0,0}};
+
+// LED Strip variables ---------------------------
+#define NUM_LEDS 6
+//const char* mode_off = "esp8266_door/off";
+//const char* mode_red_pulse = "esp8266_door/red_pulse";
+//const char* mode_green_pulse = "esp8266_door/green_pulse";
+//const char* mode_red_stable = "esp8266_door/red_stable";
+//const char* mode_green_stable = "esp8266_door/green_stable";
+//const char* mode_off = "esp8266_door/off";
+
+// Loading led strip-related libraries
+#define FASTLED_ESP8266_RAW_PIN_ORDER
+#include <FastLED.h>
+#define STRIP   D4
+
+uint8_t BRIGHTNESS = 65;
+#define VOLTS 5
+#define MAX_MA 3000
+CRGB leds[NUM_LEDS];
+int _delay = 10;
+int UPDATES_PER_SECOND = 400;
+
+String led_mode = "off";
+String prev_mode = "off";
+int last_shift = 0; // used to decide when to continue fading
+uint8_t curr_brightness = 65; // used for fading, BRIGHTNESS is max brightness
+boolean dir = false; // true = increase brighness, false = decrease
+
+// -----------------------------------------------
 
 // these two flags are used to determine whether both sensors detected movement
 // if only one flag is set to true, then don't react
@@ -80,6 +109,10 @@ void setup() {
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
+  FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_MA);
+  FastLED.addLeds<WS2812, STRIP, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
+  
   pinMode(FLAG, OUTPUT);
   digitalWrite(FLAG, LOW);
 
@@ -95,6 +128,47 @@ void loop() {
     client.connect(device_ID);
   }
 
+  // deal with led strip 
+  static uint8_t startIndex = 0;
+  startIndex = startIndex + 1; /* motion speed */
+  if(led_mode == "off"){
+    // prevent a function call to off() if it remains off
+    if(prev_mode != "off"){
+      Serial.println("TURNING OFF");
+      off();
+      prev_mode = "off";
+    }
+  }
+  else if(led_mode == "red_pulse"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "red_pulse";
+    }
+    pulse("red");
+  }
+  else if(led_mode == "green_pulse"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "green_pulse";
+    }
+    pulse("green");
+  }
+  else if(led_mode == "red_stable"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "red_stable";
+    }
+    stable("red");
+  }
+  else if(led_mode == "green_stable"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "green_stable";
+    }
+    stable("green");
+  }
+
+  // deal with sensors
   curr_time = millis();
 
   if(SENSOR_ON){
@@ -121,14 +195,14 @@ void loop() {
       time_activated_out = millis();
     }
 
-    Serial.print(distance_inner);
-    Serial.print(",");
-    Serial.println(distance_outer);
+//    Serial.print(distance_inner);
+//    Serial.print(",");
+//    Serial.println(distance_outer);
 //
-    Serial.print("\t");
-    Serial.print(FLAG_inner);
-    Serial.print(",");
-    Serial.println(FLAG_outer);
+//    Serial.print("\t");
+//    Serial.print(FLAG_inner);
+//    Serial.print(",");
+//    Serial.println(FLAG_outer);
 
     // check if both sensors were triggered
     if(FLAG_inner && FLAG_outer){
@@ -171,13 +245,15 @@ void loop() {
         else{
 //          Serial.println("\tOFF");
           digitalWrite(PRESENT, LOW);
-          http.begin("http://192.168.50.114:8181/off/sync");
+          http.begin("http://192.168.50.114:8181/sync/off");
           int httpCode = http.GET();
           http.end(); 
         }
       }
     }
   }
+  FastLED.show();
+  FastLED.delay(1000 / UPDATES_PER_SECOND);
 }
 
 // HELPER FUNCTIONS -------------------------------------------------------------------------------
@@ -219,28 +295,40 @@ void callback(String topic, byte* message, unsigned int length) {
    *  3 - (<board>/rgb, <red>/<green>/<blue>)
    *  4 - (all/rgb, <red>/<green>/<blue>)
    *  5 - (esp8266_door, <option>)
+   *  6 - (all/brightness, <brightness>)
+   *  7 - (esp8266_door/brightness, <brightness>)
   */ 
 
-  // option 5
-  if(topic == "esp8266_door"){
-    if(messageTemp == "toggle"){
-      present = !present;
-    }
-    else if(messageTemp == "reset"){
-      present = true;
-      SENSOR_ON = true;
-    }
-    else{
-      if(messageTemp == "keep_on"){
-        present = true;
-      }
-      else if(messageTemp == "keep_off"){
-        present = false;
-      }
-      SENSOR_ON = false;
-    }
+  // option 6 & 7
+  if(topic == "all/brightness" || topic == "esp8266_door/brightness"){
+    Serial.println("CHANGING BRIGHTNESS");
+    BRIGHTNESS = messageTemp.toInt();
+    FastLED.setBrightness(BRIGHTNESS);
+    Serial.print("Brightness: ");
+    Serial.println(BRIGHTNESS);
   }
-  if(topic != "off"){
+  // option 5
+  else if(topic == "esp8266_door"){
+//    if(messageTemp == "toggle"){
+//      present = !present;
+//    }
+//    else if(messageTemp == "reset"){
+//      present = true;
+//      SENSOR_ON = true;
+//    }
+//    else{
+//      if(messageTemp == "keep_on"){
+//        present = true;
+//      }
+//      else if(messageTemp == "keep_off"){
+//        present = false;
+//      }
+//      SENSOR_ON = false;
+//    }
+     Serial.println("MODE: " + messageTemp);
+     led_mode = messageTemp;
+  }
+  else if(topic != "off"){
     Serial.println("\tUPDATING...");
     // option 2
     if(messageTemp.equals("all")){
@@ -249,6 +337,7 @@ void callback(String topic, byte* message, unsigned int length) {
       }
     }
     else{
+      Serial.println("PARSING...");
       String topic_temp = topic;
       String device = topic_temp.substring(0,topic_temp.indexOf("/"));
       topic_temp = topic_temp.substring(topic_temp.indexOf("/")+1);
@@ -342,6 +431,51 @@ void reconnect() {
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
+    }
+  }
+}
+
+void off(){
+  FastLED.clear();
+}
+
+void pulse(String color){
+  curr_time = millis();
+  if(curr_time - last_shift >= 100){
+    last_shift = millis();
+    stable(color);
+    // increase brightness
+    if(dir){
+      if(curr_brightness < BRIGHTNESS){
+        curr_brightness += 10;
+        FastLED.setBrightness(curr_brightness);
+      }
+      else{
+        dir = !dir;
+      }
+    }
+    // decrease brightness
+    else{
+      if(curr_brightness >= 10){
+        curr_brightness -= 10;
+        FastLED.setBrightness(curr_brightness);
+      }
+      else{
+        dir = !dir;
+      }
+    }
+  }
+}
+
+void stable(String color){
+  if(color == "red"){
+    for( int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB(255,0,0);
+    }
+  }
+  else{
+    for( int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB(0,255,0);
     }
   }
 }

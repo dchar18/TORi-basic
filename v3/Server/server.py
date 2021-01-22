@@ -85,7 +85,7 @@ def action(board, mode):
     return render_template('main.html', **serverData)
 
 # The function below is executed when user requests all devices to update
-@app.route("/<mode>/sync")
+@app.route("/sync/<mode>")
 def sync(mode):
     print('Entering sync(',mode,')')
     for b in boards:
@@ -103,8 +103,26 @@ def sync(mode):
     mqttc.publish(mode, "all")
     return render_template('main.html', **serverData)
 
+@app.route("/<board>/brightness/<brightness>")
+def brightness(board, brightness):
+    topic = ""
+    if board == "sync":
+        for b in boards:
+            boards[b]['brightness'] = brightness
+        topic = "all/brightness"
+        mqttc.publish(topic, brightness)
+    else:
+        boards[board]['brightness'] = brightness
+        topic = board + "/brightness"
+        mqttc.publish(topic, brightness)
 
-@app.route("/<mode>/sync/<red>/<green>/<blue>")
+    serverData = {
+        'boards' : boards
+    }
+
+    return render_template('main.html', **serverData)
+
+@app.route("/sync/<mode>/<red>/<green>/<blue>")
 def syncRGB(mode, red, green, blue):
     print('Entering syncRGB(', mode, ',', red, ',', green, ',', blue, ')')
     for b in boards:

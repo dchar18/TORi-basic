@@ -8,11 +8,15 @@ import sys
 import os
 import subprocess
 import threading
+import speech_recognition as sr
 from Clock import ClockView, OffClock
 from Pomodoro import PomodoroTimerView
 from Spotify import SpotifyView
-from LEDView import LEDView
-from CameraView import CameraView
+# from LEDView import LEDView
+# from CameraView import CameraView
+sys.path.insert(1, '/Users/damiancharczuk/Documents/Projects/TORi/v3/NLP')
+from nlp import NLP
+
 # References:
 # 1. multiple frames
 #   a. https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
@@ -67,14 +71,48 @@ class Page(tk.Frame):
 
 
 class MainView(Page):
+    label_text = ""
+
     def __init__(self, *args, **kwargs):
+        self.nlp_helper = NLP()
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+
+        self.label_text = ""
+
         Page.__init__(self, *args, **kwargs)
-        label = tk.Label(
-            self,
-            text="Main View",
+        frame = tk.Frame(self, bg="gray")
+        frame.pack(fill="x", expand=False)
+        self.label = tk.Label(
+            frame,
+            text=self.label_text,
             font=LARGE_FONT
         )
-        label.pack(side="top", fill="both", expand=True)
+        button = tk.Button(
+            frame,
+            text="Main View",
+            fg="white",
+            bg="gray",
+            width=15,
+            height=7,
+            command=lambda: self.button_action
+        )
+        self.label.place(in_=frame, x=0, y=0, relwidth=1, relheight=1)
+        self.label.pack(side="top", fill="both", expand=True)
+        button.pack(side="bottom")
+
+    def button_action(self):
+        self.label_text = "Listening..."
+        self.label.config(text=self.label_text)
+
+        input = self.nlp_helper.listen(self.recognizer, self.microphone)
+        if input != "Nothing transcribed":
+            result = self.nlp_helper.predict_class(input)
+            self.label_text = result
+            self.label.config(text=self.label_text)
+        else:
+            self.label_text = input
+            self.label.config(text=self.label_text)
 
 
 class Views(tk.Frame):
@@ -90,9 +128,10 @@ class Views(tk.Frame):
         v4["bg"] = "black"
         # v5 = LEDView(self)
         # v5["bg"] = "black"
-        v5 = CameraView(self)
-        v5['bg'] = 'black'
-        self.frames = {v1, v2, v3, v4, v5}
+        # v5 = CameraView(self)
+        # v5['bg'] = 'black'
+        # self.frames = {v1, v2, v3, v4, v5}
+        self.frames = {v1, v2, v3, v4}
         # off = OffClock(self)
         # off["bg"] = "black"
 
@@ -105,7 +144,7 @@ class Views(tk.Frame):
         v2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         v3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         v4.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
-        v5.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        # v5.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         # off.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
         # button for main screen
@@ -147,15 +186,15 @@ class Views(tk.Frame):
             height=7,
             command=lambda: changeFrame(v4)
         )
-        b5 = tk.Button(
-            button_frame,
-            text="Camera",
-            fg="white",
-            bg="gray",
-            width=15,
-            height=7,
-            command=lambda: changeFrame(v5)
-        )
+        # b5 = tk.Button(
+        #     button_frame,
+        #     text="Camera",
+        #     fg="white",
+        #     bg="gray",
+        #     width=15,
+        #     height=7,
+        #     command=lambda: changeFrame(v5)
+        # )
         exit_button = tk.Button(
             button_frame,
             text="Exit",
@@ -169,7 +208,7 @@ class Views(tk.Frame):
         b2.pack(side="top")
         b3.pack(side="top")
         b4.pack(side="top")
-        b5.pack(side="top")
+        # b5.pack(side="top")
         exit_button.pack(side="top")
 
         v1.show()

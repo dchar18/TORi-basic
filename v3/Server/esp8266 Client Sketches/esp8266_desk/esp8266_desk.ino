@@ -24,7 +24,7 @@
 const String ID = "esp8266_desk";
 const char* device_ID = "esp8266_desk";
 
-#define NUM_LEDS 170 // used for esp8266_desk
+#define NUM_LEDS 170
 
 // done explicitly to avoid char/char*/String conversions and concatenations
 const char* mode_off = "esp8266_desk/off";

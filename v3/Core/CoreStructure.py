@@ -10,6 +10,7 @@
 # 5. corresponding function (skill) is called
 
 import sys
+import os
 sys.path.insert(1, '/Users/damiancharczuk/Documents/Projects/TORi/v3/NLP')
 # sys.path.insert(1, '/home/pi/Documents/TORi/v3/NLP')
 from nlp import *
@@ -22,20 +23,30 @@ import nltk
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
+import requests
+import subprocess
+import json
+
 
 class Core():
     skills = [
         'wake', 'about', 'weather', 
         'google', 'math', 'file', 
         'email', 'leds', 'modes', 
-        'update'
+        'update', 'application'
     ]
     full_command = ''
     intent = ''
 
+    abspath = '/Users/damiancharczuk/Documents/Projects/TORi/v3/NLP/'
+    intents = json.loads(open(abspath + 'intents.json').read())
+
     # def __init__(self) -> None:
         # self.app = None
 
+    def say(self, text):  # vocal response - faster generation of speech
+        subprocess.call(['say', text])
+        print("TORi: " + text)
     # inputs:
     #   self - object
     #   prediction - set in format: [{'intent': 'modes', 'probability': '0.9999721'}]
@@ -68,6 +79,8 @@ class Core():
                 self.modes()
             elif self.intent == 'update':
                 self.update()
+            elif self.intent == 'application':
+                self.application()
 
     def wake(self):
         print()
@@ -91,17 +104,11 @@ class Core():
         print()
 
     def leds(self):
-        # temporarily call the modes function
-        # will be replaced once Spotify functionality added to modes()
-        self.modes()
-
-    def modes(self):
         modes = ['off', 'random', 'christmas', 'study', 'party']
         boards = ['desk', 'bed']
         # if self.app == None:
         #     self.app = server_start()
-
-        url = '' # used to select the appropriate button in the web server
+        #url = '' # used to select the appropriate button in the web server
         # parse out what devices should be modified- TODO
         words = nltk.word_tokenize(self.full_command)
         print("Parsing the command...")
@@ -113,10 +120,12 @@ class Core():
                 if m in words:
                     mode = m
             url = '/' + mode + '/sync'
+            self.send_mode(url)
         else:
             # 'and' indicates that the user will want to set different modes to each device
             if 'and' in words:
                 # split the list into lists containing a single command for each board
+                # https://www.geeksforgeeks.org/python-split-list-into-lists-by-particular-value/
                 size = len(words) 
                 idx_list = [idx + 1 for idx, val in enumerate(words) if val == 'and']
                 res = [words[i: j] for i, j in zip([0] + idx_list, idx_list + ([size] if idx_list[-1] != size else []))]
@@ -148,15 +157,29 @@ class Core():
                 url = '/esp8266_' + board + '/' + mode
                 self.send_mode(url)
 
+    def modes(self):
+        modes = ['christmas', 'study', 'party', 'relaxation', 'quiet']
+        words = nltk.word_tokenize(self.full_command)
+        mode = ''
+
+        for m in modes:
+            if m in words:
+                mode = m
+
+        print("Mode found: ", mode)
+        if mode == 'christmas':
+            url = '/' + mode + '/sync'
+            self.send_mode(url)
+            self.open_application('Spotify')
+            response = requests.get('https://open.spotify.com/playlist/37i9dQZF1DX0Yxoavh5qJV?si=_SAEryHhTwGYh2Cy_BK4ig')
+            print(response.status_code)
+
+
     def send_mode(self, url):
-        print("Accessing server through selenium...")
-        opt = Options()
-        opt.add_argument("--headless") 
-        driver = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=opt)
-        # driver = webdriver.Chrome('/home/pi/Documents/TORi/v3/chromedriver', chrome_options=opt)
-        driver.get('http://192.168.50.114:8181/')
-        driver.find_element_by_xpath('//a[@href="'+url+'"]').click()
-        driver.close()
+        print("Sending http request using url: ", url)
+        url = 'http://192.168.50.114:8181' + url
+        print('Updated url: ', url)
+        requests.get(url)
 
     def wake(self):
         print()
@@ -176,3 +199,10 @@ class Core():
         # add the phrases to intents in intents.json
         # save intents.json
         print()
+
+    def application(self):
+        print()
+
+    def open_application(self, name):
+        d = '/Applications'
+        os.system('open ' + d + '/%s.app' % name.replace(' ', '\ '))
