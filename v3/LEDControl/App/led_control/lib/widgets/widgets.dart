@@ -38,7 +38,8 @@ class DeviceTile extends StatelessWidget {
           builder: (_) => deviceName == "RC Lambo"
               ? RCControlScreen(dc: new DeviceControl(this.deviceName))
               : deviceName == "Door Sensor"
-                  ? DoorSensorControl()
+                  // ? DoorSensorControl()
+                  ? OptionList()
                   : ControlScreen(dc: new DeviceControl(this.deviceName)),
         ),
       ),
