@@ -9,12 +9,6 @@
  *            https://gist.github.com/kriegsman/756ea6dcae8e30845b5a (for twinkle modes
  */
 
-// For each board, change the values of the following variables:
-// - NUM_LEDS
-// - ID
-// - device_ID
-// - all the modes
-
 // SETUP VARIABLES --------------------------------------------------------------------------------
 // Loading the ESP8266WiFi library and the PubSubClient library
 #include <ESP8266WiFi.h>
@@ -41,10 +35,13 @@ const char* mode_fire = "esp8266_desk/fire";
 const char* mode_blue_fire = "esp8266_desk/blue_fire";
 const char* mode_rgb = "esp8266_desk/rgb";
 const char* mode_brightness = "esp8266_desk/brightness";
+const char* mode_color_fade = "esp8266_desk/color_fade";
 int red = 0;
 int green = 0;
 int blue = 255;
 int STATE = 0;
+int prev_fade = 0; // stores the last time the color fade changed
+int curr_fade = 0;
 
 // Change the credentials below, so your ESP8266 connects to your router
 const char* ssid = "egon24";
@@ -165,6 +162,14 @@ void callback(String topic, byte* message, unsigned int length) {
 //      Serial.println("All changing to \'random\'");
 //      led_mode = "random";
 //    }
+    else if(topic == "color_fade"){
+      Serial.println("All changing to \'color_fade\'");
+      led_mode = "color_fade";
+      red = 0;
+      green = 0;
+      blue = 255;
+      STATE = 0;
+    }
     else if(topic == "christmas"){
       Serial.println("All changing to \'christmas\'");
       led_mode = "christmas";
@@ -216,6 +221,14 @@ void callback(String topic, byte* message, unsigned int length) {
 //      Serial.println(ID + " changing to \'random\'");
 //      led_mode = "random";
 //    }
+    else if(topic == mode_color_fade){
+      Serial.println(ID + " changing to \'color_fade\'");
+      led_mode = "color_fade";
+      red = 0;
+      green = 0;
+      blue = 255;
+      STATE = 0;
+    }
     else if(topic == mode_christmas){
       Serial.println(ID + " changing to \'christmas\'");
       led_mode = "christmas";
@@ -318,6 +331,7 @@ void reconnect() {
       client.subscribe(mode_lava);
       client.subscribe(mode_rgb);
       client.subscribe(mode_brightness);
+      client.subscribe(mode_color_fade);
       client.subscribe("off");
 //      client.subscribe("random");
       client.subscribe("christmas");
@@ -332,6 +346,7 @@ void reconnect() {
       client.subscribe("lava");
       client.subscribe("all/rgb");
       client.subscribe("all/brightness");
+      client.subscribe("color_fade");
     } else {
       /* Error codes:
        * -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
@@ -414,6 +429,17 @@ void loop() {
       prev_mode = "rgb";
     }
     setRGB();
+  }
+  else if(led_mode == "color_fade"){
+    if(prev_mode == "off"){
+      startIndex = 0;
+      prev_mode = "color_fade";
+    }
+    curr_fade = millis();
+    if(curr_fade - prev_fade >= 200){
+      color_fade();
+      prev_fade = millis();
+    }
   }
 //  else if(led_mode == "random"){
 //    // check the current mode is running its first iteration after off()
@@ -554,6 +580,40 @@ void off(){
 //}
 
 void setRGB(){
+  for( int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB(red,green,blue);
+  }
+  FastLED.show();
+}
+
+void color_fade(){
+  if(STATE == 0){
+    if(red == 255){
+      STATE = 1;
+    }
+    else{
+      red += 5;
+      blue -= 5;
+    }
+  }
+  if(STATE == 1){
+    if(green == 255){
+      STATE = 2;
+    }
+    else{
+      green += 5;
+      red -= 5;
+    }
+  }
+  if(STATE == 2){
+    if(blue == 255){
+      STATE = 0;
+    }
+    else{
+      blue += 5;
+      green -= 5;
+    }
+  }
   for( int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CRGB(red,green,blue);
   }
