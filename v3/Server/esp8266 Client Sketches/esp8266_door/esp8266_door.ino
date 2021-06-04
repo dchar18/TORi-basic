@@ -25,7 +25,7 @@ const char* ssid = "egon24";
 const char* password = "4432egon";
 
 // Change the variable to your Raspberry Pi IP address, so it connects to your MQTT broker
-const char* mqtt_server = "192.168.50.114";
+const char* mqtt_server = "192.168.50.115";
 
 // Initializes the espClient
 WiFiClient espClient;
@@ -56,12 +56,6 @@ int rgb_vals[num_devices][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
 // LED Strip variables ---------------------------
 #define NUM_LEDS 6
-//const char* mode_off = "esp8266_door/off";
-//const char* mode_red_pulse = "esp8266_door/red_pulse";
-//const char* mode_green_pulse = "esp8266_door/green_pulse";
-//const char* mode_red_stable = "esp8266_door/red_stable";
-//const char* mode_green_stable = "esp8266_door/green_stable";
-//const char* mode_off = "esp8266_door/off";
 
 // Loading led strip-related libraries
 #define FASTLED_ESP8266_RAW_PIN_ORDER

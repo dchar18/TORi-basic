@@ -20,22 +20,6 @@ const char* device_ID = "esp8266_bed";
 
 #define NUM_LEDS 110
 
-// done explicitly to avoid char/char*/String conversions and concatenations
-const char* mode_off = "esp8266_bed/off";
-//const char* mode_random = "esp8266_bed/random";
-const char* mode_christmas = "esp8266_bed/christmas";
-const char* mode_study = "esp8266_bed/study";
-const char* mode_party = "esp8266_bed/party";
-const char* mode_twinkle_christmas = "esp8266_bed/twinkle_christmas";
-const char* mode_twinkle_blue = "esp8266_bed/twinkle_blue";
-const char* mode_twinkle_green = "esp8266_bed/twinkle_green";
-const char* mode_snow = "esp8266_bed/snow";
-const char* mode_fire = "esp8266_bed/fire";
-const char* mode_blue_fire = "esp8266_bed/blue_fire";
-const char* mode_lava = "esp8266_bed/lava";
-const char* mode_rgb = "esp8266_bed/rgb";
-const char* mode_brightness = "esp8266_bed/brightness";
-const char* mode_color_fade = "esp8266_bed/color_fade";
 int red = 0;
 int green = 0;
 int blue = 255;
@@ -48,7 +32,7 @@ const char* ssid = "egon24";
 const char* password = "4432egon";
 
 // Change the variable to your Raspberry Pi IP address, so it connects to your MQTT broker
-const char* mqtt_server = "192.168.50.114";
+const char* mqtt_server = "192.168.50.115";
 
 // Initializes the espClient
 WiFiClient espClient;
@@ -67,8 +51,6 @@ CRGB leds[NUM_LEDS];
 int count = 0;
 int _delay = 10;
 int UPDATES_PER_SECOND = 400;
-//int NUM_COLOR_MODES = 9;
-//String modes[] = {"rgb", "christmas", "study", "party", "twinkle_christmas", "twinkle_blue", "twinkle_green", "snow", "fire", "lava"};
 
 // used for the "twinkle" modes ---------------------
 // Overall twinkle speed.
@@ -150,138 +132,12 @@ void callback(String topic, byte* message, unsigned int length) {
   }
   Serial.println();
 
-  // if all devices are supposed to respond to the change
-  if(messageTemp == "all"){
-    if(topic == "off"){
-      Serial.println("All changing to \'off\'");
-      led_mode = "off";
-    }
-//    else if(topic == "random"){
-//      Serial.println("All changing to \'random\'");
-//      led_mode = "random";
-//    }
-    else if(topic == "color_fade"){
-      Serial.println("All changing to \'color_fade\'");
-      led_mode = "color_fade";
-      red = 0;
-      green = 0;
-      blue = 255;
-      STATE = 0;
-    }
-    else if(topic == "christmas"){
-      Serial.println("All changing to \'christmas\'");
-      led_mode = "christmas";
-    }
-    else if(topic == "study"){
-      Serial.println("All changing to \'study\'");
-      led_mode = "study";
-    }
-    else if(topic == "party"){
-      Serial.println("All changing to \'party\'");
-      led_mode = "party";
-    }
-    else if(topic == "twinkle_christmas"){
-      Serial.println("All changing to \'twinkle_christmas\'");
-      led_mode = "twinkle_christmas";
-    }
-    else if(topic == "twinkle_blue"){
-      Serial.println("All changing to \'twinkle_blue\'");
-      led_mode = "twinkle_blue";
-    }
-    else if(topic == "twinkle_green"){
-      Serial.println("All changing to \'twinkle_green\'");
-      led_mode = "twinkle_green";
-    }
-    else if(topic == "snow"){
-      Serial.println("All changing to \'snow\'");
-      led_mode = "snow";
-    }
-    else if(topic == "fire"){
-      Serial.println("All changing to \'fire\'");
-      led_mode = "fire";
-    }
-    else if(topic == "blue_fire"){
-      Serial.println("All changing to \'fire\'");
-      led_mode = "blue_fire";
-    }
-    else if(topic == "lava"){
-      Serial.println("All changing to \'lava\'");
-      led_mode = "lava";
-    }
-
-  }
-  // only the device with matching ID should respond
-  else if(messageTemp.equals(ID)){
-    if(topic == mode_off){
-      Serial.println(ID + " changing to \'off\'");
-      led_mode = "off";
-    }
-//    else if(topic == mode_random){
-//      Serial.println(ID + " changing to \'random\'");
-//      led_mode = "random";
-//    }
-    else if(topic == mode_color_fade){
-      Serial.println(ID + " changing to \'color_fade\'");
-      led_mode = "color_fade";
-      red = 0;
-      green = 0;
-      blue = 255;
-      STATE = 0;
-    }
-    else if(topic == mode_christmas){
-      Serial.println(ID + " changing to \'christmas\'");
-      led_mode = "christmas";
-      // UPDATES_PER_SECOND = 400;
-    }
-    else if(topic == mode_study){
-      Serial.println(ID + " changing to \'study\'");
-      led_mode = "study";
-      // UPDATES_PER_SECOND = 200;
-    }
-    else if(topic == mode_party){
-      Serial.println(ID + " changing to \'party\'");
-      led_mode = "party";
-      // UPDATES_PER_SECOND = 500;
-    }
-    else if(topic == mode_twinkle_christmas){
-      Serial.println(ID + " changing to \'twinkle_christmas\'");
-      led_mode = "twinkle_christmas";
-    }
-    else if(topic == mode_twinkle_blue){
-      Serial.println(ID + " changing to \'twinkle_blue\'");
-      led_mode = "twinkle_blue";
-    }
-    else if(topic == mode_twinkle_green){
-      Serial.println(ID + " changing to \'twinkle_green\'");
-      led_mode = "twinkle_green";
-    }
-    else if(topic == mode_snow){
-      Serial.println(ID + " changing to \'snow\'");
-      led_mode = "snow";
-    }
-    else if(topic == mode_fire){
-      Serial.println(ID + " changing to \'fire\'");
-      led_mode = "fire";
-    }
-    else if(topic == mode_blue_fire){
-      Serial.println(ID + " changing to \'blue_fire\'");
-      led_mode = "blue_fire";
-    }
-    else if(topic == mode_lava){
-      Serial.println(ID + " changing to \'lava\'");
-      led_mode = "lava";
-    }
-  }
-  // responding to topic: all/brightness, message: <brightness>
-  else if(topic == "all/brightness" || topic == mode_brightness){
-    BRIGHTNESS = messageTemp.toInt();
-    FastLED.setBrightness(BRIGHTNESS);
-    Serial.print("Brightness: ");
-    Serial.println(BRIGHTNESS);
-  }
-  // responding to topic: all/rgb, message: <red>/<green>/<blue>
-  else{
-    String temp = messageTemp;
+  // find the first agrument
+  String temp = messageTemp;
+  String receivedMode = temp.substring(0,temp.indexOf("/"));
+  temp = temp.substring(temp.indexOf("/")+1);
+  
+  if(receivedMode == "rgb"){
     // parse out the red, green, blue values from the message
     red = temp.substring(0,temp.indexOf("/")).toInt();
     temp = temp.substring(temp.indexOf("/")+1);
@@ -292,6 +148,22 @@ void callback(String topic, byte* message, unsigned int length) {
     blue = temp.toInt();
     
     led_mode = "rgb";
+  }
+  else if(receivedMode == "brightness"){
+    BRIGHTNESS = temp.toInt();
+    FastLED.setBrightness(BRIGHTNESS);
+    Serial.print("Brightness: ");
+    Serial.println(BRIGHTNESS);
+  }
+  else if(receivedMode == "color_fade"){
+    led_mode = "color_fade";
+    red = 0;
+    green = 0;
+    blue = 255;
+    STATE = 0;
+  }
+  else{
+    led_mode = receivedMode;
   }
 }
 
@@ -319,36 +191,8 @@ void reconnect() {
       digitalWrite(FLAG_LED, LOW);
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
-      client.subscribe(mode_off);
-//      client.subscribe(mode_random);
-      client.subscribe(mode_christmas);
-      client.subscribe(mode_study);
-      client.subscribe(mode_party);
-      client.subscribe(mode_twinkle_christmas);
-      client.subscribe(mode_twinkle_blue);
-      client.subscribe(mode_twinkle_green);
-      client.subscribe(mode_snow);
-      client.subscribe(mode_fire);
-      client.subscribe(mode_blue_fire);
-      client.subscribe(mode_lava);
-      client.subscribe(mode_rgb);
-      client.subscribe(mode_brightness);
-      client.subscribe(mode_color_fade);
-      client.subscribe("off");
-//      client.subscribe("random");
-      client.subscribe("christmas");
-      client.subscribe("study");
-      client.subscribe("party");
-      client.subscribe("twinkle_christmas");
-      client.subscribe("twinkle_blue");
-      client.subscribe("twinkle_green");
-      client.subscribe("snow");
-      client.subscribe("fire");
-      client.subscribe("blue_fire");
-      client.subscribe("lava");
-      client.subscribe("all/rgb");
-      client.subscribe("all/brightness");
-      client.subscribe("color_fade");
+      client.subscribe(device_ID);
+      client.subscribe("sync");
     } else {
       /* Error codes:
        * -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
@@ -443,14 +287,6 @@ void loop() {
       prev_fade = millis();
     }
   }
-//  else if(led_mode == "random"){
-//    // check the current mode is running its first iteration after off()
-//    if(prev_mode == "off"){
-//      startIndex = 0;
-//      prev_mode = "random";
-//    }
-//    random_mode(startIndex);
-//  }
   else if(led_mode == "christmas"){
     if(prev_mode == "off"){
       startIndex = 0;
@@ -478,7 +314,7 @@ void loop() {
     currentPalette = RainbowColors_p;
     use_palette(startIndex);
   }
-  else if(led_mode == "twinkle_christmas"){
+  else if(led_mode == "christmas_twinkle"){
     if(prev_mode == "off"){
       startIndex = 0;
       prev_mode = "twinkle_christmas";
@@ -487,7 +323,7 @@ void loop() {
     currentPalette = RedGreenWhite_p;
     twinkle();
   }
-  else if(led_mode == "twinkle_blue"){
+  else if(led_mode == "blue_twinkle"){
     if(prev_mode == "off"){
       startIndex = 0;
       prev_mode = "twinkle_blue";
@@ -496,7 +332,7 @@ void loop() {
     currentPalette = Ice_p;
     twinkle();
   }
-  else if(led_mode == "twinkle_green"){
+  else if(led_mode == "green_twinkle"){
     if(prev_mode == "off"){
       startIndex = 0;
       prev_mode = "twinkle_green";
@@ -550,36 +386,6 @@ void loop() {
 void off(){
   FastLED.clear();
 }
-
-//void random_mode(uint8_t colorIndex){
-//  uint8_t rand_num = random(NUM_COLOR_MODES);
-//  led_mode = modes[rand_num];
-//  if(rand_num == 0){
-//    setRGB();
-//  }
-//  else if(rand_num < 3){
-//    use_palette(colorIndex);
-//  }
-//  else{
-//    // christmas twinkle
-//    if(rand_num == 3){
-//      currentPalette = RedGreenWhite_p;
-//    }
-//    // twinkle blue
-//    else if(rand_num == 4){
-//      currentPalette = Ice_p;
-//    }
-//    // twinkle green
-//    else if(rand_num == 5){
-//      currentPalette = Holly_p;
-//    }
-//    // twinkle snow
-//    else if(rand_num == 6){
-//      currentPalette = Snow_p;
-//    }
-//    twinkle();
-//  }
-//}
 
 void setRGB(){
   for( int i = 0; i < NUM_LEDS; i++) {
