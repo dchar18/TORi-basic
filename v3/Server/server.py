@@ -18,90 +18,110 @@ mqttc.loop_start()
 # 'status' indicates whether or not the board is connected to the server
 
 boards = {
-    'esp8266_door' : {
-        'name' : 'esp8266_door', 
-        'option' : 'on', 
+    'esp8266_door': {
+        'name': 'esp8266_door',
+        'option': 'on',
     },
-    'esp8266_desk' : {
-        'name' : 'esp8266_desk', 
-        'mode' : 'off', 
-        'rgb' : {
-            'red' : 0, 
-            'green' : 0, 
-            'blue' : 0
+    'esp8266_desk': {
+        'name': 'esp8266_desk',
+        'mode': 'off',
+        'rgb': {
+            'red': 0,
+            'green': 0,
+            'blue': 0
         }
     },
-    'esp8266_bed' : {
-        'name' : 'esp8266_bed', 
-        'mode' : 'off', 
-        'rgb' : {
-            'red' : 0, 
-            'green' : 0, 
-            'blue' : 0
+    'esp8266_bed': {
+        'name': 'esp8266_bed',
+        'mode': 'off',
+        'rgb': {
+            'red': 0,
+            'green': 0,
+            'blue': 0
         }
     },
-    'esp8266_rclambo' : {
-        'name' : 'esp8266_rclambo', 
-        'mode' : 'off', 
-        'rgb' : {
-            'red' : 0, 
-            'green' : 0, 
-            'blue' : 0
+    'esp8266_rclambo': {
+        'name': 'esp8266_rclambo',
+        'mode': 'off',
+        'rgb': {
+            'red': 0,
+            'green': 0,
+            'blue': 0
         }
+    },
+    'esp8266_case': {
+        'name': 'esp8266_case',
+        'mode': 'off',
+        'rgb': {
+            'red': 0,
+            'green': 0,
+            'blue': 0
+        },
+        'cell': [-1, -1]  # [row, col]
     }
 }
 serverData = {
-    'boards' : boards
+    'boards': boards
 }
 
 # called to start the server
+
+
 def server_start():
     app.run(host='0.0.0.0', port=8181, debug=True)
     return app
 
-@app.route("/") # determines what URL should trigger the function
+
+@app.route("/")  # determines what URL should trigger the function
 def main():
     print('TORi/v3/Server/server: entering main()')
     # Pass the server data into the template main.html and return it to the user
     return render_template('main.html', **serverData)
 
 # The function below is executed when someone requests a URL with the pin number and action in it:
+
+
 @app.route("/<board>/<mode>")
 def action(board, mode):
-    print('Entering action(' , board, ', ', mode, ')')
+    print('Entering action(', board, ', ', mode, ')')
     # get the board from the URL
     target_board = str(board)
     # update the board's mode
     boards[target_board]['mode'] = mode
     for i in boards:
-        print(i,': ',boards[i])
+        print(i, ': ', boards[i])
 
     serverData = {
-        'boards' : boards
+        'boards': boards
     }
 
-    topic = target_board + '/' + mode
-    mqttc.publish(topic, target_board) # publish() takes topic and message as parameters
+    topic = target_board
+    message = mode
+    # publish() takes topic and message as parameters
+    mqttc.publish(topic, message)
     return render_template('main.html', **serverData)
 
 # The function below is executed when user requests all devices to update
+
+
 @app.route("/sync/<mode>")
 def sync(mode):
-    print('Entering sync(',mode,')')
+    print('Entering sync(', mode, ')')
     for b in boards:
         if b != 'esp8266_door':
             # update the board's mode
             boards[b]['mode'] = mode
 
     for i in boards:
-        print(i,': ',boards[i])
+        print(i, ': ', boards[i])
 
     serverData = {
-        'boards' : boards
+        'boards': boards
     }
 
-    mqttc.publish(mode, "all")
+    mqttc.publish("sync", mode)
     return render_template('main.html', **serverData)
+
 
 @app.route("/<board>/brightness/<brightness>")
 def brightness(board, brightness):
@@ -109,18 +129,19 @@ def brightness(board, brightness):
     if board == "sync":
         for b in boards:
             boards[b]['brightness'] = brightness
-        topic = "all/brightness"
-        mqttc.publish(topic, brightness)
+        topic = "sync"
+        mqttc.publish(topic, 'brightness/' + brightness)
     else:
         boards[board]['brightness'] = brightness
-        topic = board + "/brightness"
-        mqttc.publish(topic, brightness)
+        topic = board
+        mqttc.publish(topic, 'brightness/' + brightness)
 
     serverData = {
-        'boards' : boards
+        'boards': boards
     }
 
     return render_template('main.html', **serverData)
+
 
 @app.route("/sync/<mode>/<red>/<green>/<blue>")
 def syncRGB(mode, red, green, blue):
@@ -134,34 +155,38 @@ def syncRGB(mode, red, green, blue):
             boards[b]['rgb']['blue'] = int(blue)
 
     for i in boards:
-        print(i,': ',boards[i])
+        print(i, ': ', boards[i])
 
     serverData = {
-        'boards' : boards
+        'boards': boards
     }
 
-    message = red + '/' + green + '/' + blue
-    mqttc.publish("all/rgb", message)
+    topic = 'sync'
+    message = 'rgb/' + red + '/' + green + '/' + blue
+    mqttc.publish(topic, message)
     return render_template('main.html', **serverData)
 
 # this funciton is executed when the RGB sliders are used in the Flutter application
+
+
 @app.route("/<board>/<mode>/<red>/<green>/<blue>")
 def rgb(board, mode, red, green, blue):
-     print('Entering rgb(',red,',',green,',',blue,')')
-     target_board = str(board)
-     boards[target_board]['mode'] = mode
-     boards[target_board]['rgb']['red'] = int(red)
-     boards[target_board]['rgb']['green'] = int(green)
-     boards[target_board]['rgb']['blue'] = int(blue)
+    print('Entering rgb(', red, ',', green, ',', blue, ')')
+    target_board = str(board)
+    boards[target_board]['mode'] = mode
+    boards[target_board]['rgb']['red'] = int(red)
+    boards[target_board]['rgb']['green'] = int(green)
+    boards[target_board]['rgb']['blue'] = int(blue)
 
-     serverData = {
-        'boards' : boards
+    serverData = {
+        'boards': boards
     }
-     
-     topic = target_board + '/rgb'
-     message = red + '/' + green + '/' + blue
-     mqttc.publish(topic, message)
-     return render_template('main.html', **serverData)
+
+    topic = target_board
+    message = 'rgb/' + red + '/' + green + '/' + blue
+    mqttc.publish(topic, message)
+    return render_template('main.html', **serverData)
+
 
 @app.route("/esp8266_door/<option>")
 def doorOption(option):
@@ -179,14 +204,31 @@ def doorOption(option):
         boards['esp8266_door']['option'] = option
 
     serverData = {
-        'boards' : boards
+        'boards': boards
     }
 
     topic = 'esp8266_door'
     message = option
     mqttc.publish(topic, message)
     return render_template('main.html', **serverData)
-    
+
+
+@app.route("/esp8266_case/cell/<row>/<col>/<red>/<green>/<blue>")
+def caseCell(row, col, red, green, blue):
+    boards['esp8266_case']['cell'][0] = row
+    boards['esp8266_case']['cell'][1] = col
+    boards['esp8266_case']['rgb']['red'] = int(red)
+    boards['esp8266_case']['rgb']['green'] = int(green)
+    boards['esp8266_case']['rgb']['blue'] = int(blue)
+
+    serverData = {
+        'boards': boards
+    }
+
+    topic = 'esp8266_case'
+    message = 'cell/' + row + '/' + col + '/' + red + '/' + green + '/' + blue
+    mqttc.publish(topic, message)
+    return render_template('main.html', **serverData)
 
 
 def shutdown_server():
@@ -194,6 +236,7 @@ def shutdown_server():
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+
 
 @app.route('/shutdown', methods=['POST'])
 def shutdown():
