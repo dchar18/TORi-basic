@@ -22,6 +22,10 @@ boards = {
         'name': 'esp8266_door',
         'option': 'on',
     },
+    'esp8266_sian': {
+        'name': 'esp8266_sian',
+        'mode': 'on',
+    },
     'esp8266_desk': {
         'name': 'esp8266_desk',
         'mode': 'off',
@@ -215,6 +219,8 @@ def doorOption(option):
 
 @app.route("/esp8266_case/cell/<row>/<col>/<red>/<green>/<blue>")
 def caseCell(row, col, red, green, blue):
+    print('Entering caseCell(', row, ',', col,
+          ',', red, ',', green, ',', blue, ')')
     boards['esp8266_case']['cell'][0] = row
     boards['esp8266_case']['cell'][1] = col
     boards['esp8266_case']['rgb']['red'] = int(red)
